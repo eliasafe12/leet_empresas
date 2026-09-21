@@ -13,7 +13,7 @@ class Produto():
         else: return f"{self.nome} tem estoque: {self.quantidade}"
 
     def getInformacoes(self): 
-        return self.codigo, self.nome, self.preco
+        return self.codigo, self.preco
 
     def __str__(self): return f'Nome: {self.nome} - Código: {self.codigo} - Preço: R${self.preco:.2f}'
    

@@ -11,3 +11,5 @@ class Movimentacao(ABC): # compra e venda
 
     @abstractmethod
     def calcularPrecoFinal(self): pass
+    @abstractmethod
+    def getValor(self): pass
