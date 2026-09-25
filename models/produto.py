@@ -15,5 +15,5 @@ class Produto():
     def getInformacoes(self): 
         return self.codigo, self.preco
 
-    def __str__(self): return f'Nome: {self.nome} - Código: {self.codigo} - Preço: R${self.preco:.2f}'
-   
+
+    def __str__(self): return f'Nome: {self.nome} - Código: {self.codigo} - Preço: R${self.preco:.2f} - Quantidade: {self.quantidade}'

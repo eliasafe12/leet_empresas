@@ -1,7 +1,7 @@
 from models.movimentacao import Movimentacao
 class Compra(Movimentacao):
-    def __init__(self, codigo, *args):
-        super().__init__(codigo, *args)
+    def __init__(self, produtos):
+        super().__init__(produtos)
 
     def calcularPrecoFinal(self):
         preco_final = 0
