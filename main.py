@@ -13,12 +13,14 @@ while True:
     a = int(input('''
 1 - Cadastrar Produto
 2 - Ver produtos
-3 - Cadastrar venda realizada
-4 - Cadastrar compra realizada
-5 - Cadastrar Conta a pagar
-6 - Listar contas
-7 - Fazer Saldo do dia
-8 - Sair
+3 - Excluir Produto
+4 - Atualizar preço do produto
+5 - Cadastrar venda realizada
+6 - Cadastrar compra realizada
+7 - Cadastrar Conta a pagar
+8 - Listar contas
+9 - Fazer Saldo do dia
+10 - Sair
 '''))
     match a:
         case 1:
@@ -37,7 +39,34 @@ while True:
             print("Produtos:")
             for i in produtos:
                 print(i)    
+        
         case 3:
+            print("Produtos:")
+            for i in produtos:
+                print(i)    
+            codigo = int(input("Código do produto a ser excluído: "))
+            for i in produtos:
+                if i.codigo == codigo:
+                    produtos.remove(i)
+                    print("Produto removido!")
+                    break
+            else: print("Produto não encontrado!")
+
+        case 4:
+            print("Produtos:")
+            for i in produtos:
+                print(i)    
+            codigo = int(input("Produto a ser atualizado: "))
+            for i in produtos:
+                if i.codigo == codigo:
+                    print(i)
+                    preco = float(input("Novo preço: "))
+                    atualizacao = i.atualizarPreco(preco)
+                    print(atualizacao)
+                    break
+            else: print("Produto não encontrado!")
+
+        case 5:
             venda_produtos = []
             quant_produtos = int(input("Quantos produtos foram vendidos? "))
             for i in range(quant_produtos):
@@ -52,7 +81,8 @@ while True:
                     break
             vendas.append(Venda(venda_produtos))
             print(vendas[-1])
-        case 4:
+
+        case 6:
             compra_produtos = []
             quant_produtos = int(input("Quantos produtos foram comprados? "))
             for i in range(quant_produtos):
@@ -68,20 +98,23 @@ while True:
             compras.append(Compra(compra_produtos))
             print(compras[-1])
             
-        case 5: 
+        case 7: 
             descricao = input("Qual a conta? ")
             valor = float(input("Qual o valor? "))
             vencimento = input("Quando vence? ")
             contas.append(Conta(descricao, valor, vencimento))
             print("Conta cadastrada!")
-        case 6:
+
+        case 8:
             print("Contas")
             for i in contas:
                 print(i)
-        case 7:
+
+        case 9:
             saldo_diario = Saldo(vendas,compras,contas)
             print(saldo_diario)
-        case 8:
+
+        case 10:
             break
 
 
