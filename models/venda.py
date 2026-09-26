@@ -9,7 +9,7 @@ class Venda(Movimentacao):
             preco_final += i[1] * i[2] # preço * quantidade
         return preco_final
     
-    def getValor(self): return self.valor # para fazer o saldo diario
+    def getValor(self): return self.preco_final # para fazer o saldo diario
 
     def __str__(self):
         msg = f"Venda realizada em {self.data}\n"

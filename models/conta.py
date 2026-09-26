@@ -10,7 +10,7 @@ class Conta():
         if self.vencimento == tempo.strftime('%d/%m/%Y'):
             return f"{self.descricao} vence hoje!"
     
-    def getValor(self): return -(self.valor) # para fazer o saldo diario
+    def getValor(self): return self.valor # para fazer o saldo diario
 
-    def getInformacoes(self):
-        return self.descricao, self.valor, self.vencimento
+    def __str__(self):
+        return f"Conta: {self.descricao} - Valor: R${self.valor:.2f} - Vencimento: {self.vencimento}"

@@ -12,6 +12,12 @@ class Produto():
         elif self.quantidade <= 5: return f"{self.nome} acabando!"
         else: return f"{self.nome} tem estoque: {self.quantidade}"
 
+    def alterarEstoque(self, tipo, quant):
+        if tipo == "Venda":
+            self.quantidade -= quant
+        elif tipo == "Compra":
+            self.quantidade += quant
+
     def getInformacoes(self): 
         return self.codigo, self.preco
 
