@@ -2,7 +2,7 @@ from models.venda import Venda
 from models.compra import Compra
 from models.produto import Produto
 from models.conta import Conta
-from models.saldo import Saldo
+from models.saldo import SaldoDiario
 
 produtos = []
 vendas = []
@@ -111,7 +111,7 @@ while True:
                 print(i)
 
         case 9:
-            saldo_diario = Saldo(vendas,compras,contas)
+            saldo_diario = SaldoDiario(vendas,compras,contas)
             print(saldo_diario)
 
         case 10:

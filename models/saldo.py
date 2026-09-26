@@ -1,4 +1,4 @@
-class Saldo():
+class SaldoDiario():
     def __init__(self, vendas, compras, contas):
         self.vendas = vendas
         self.compras = compras
