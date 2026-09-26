@@ -18,6 +18,13 @@ class Produto():
         elif tipo == "Compra":
             self.quantidade += quant
 
+    def atualizarPreco(self, novo_preco):
+        if novo_preco < 0:
+            return "Preço Inválido"
+        else:
+            self.preco = novo_preco
+            return "Preço Atualizado!"
+
     def getInformacoes(self): 
         return self.codigo, self.preco
 
