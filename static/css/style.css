@@ -41,11 +41,11 @@ body {
 
 .brand-subtitle {
     font-size: 1.05rem;
-    font-weight: 300;
+    font-weight: 350;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.9);
     max-width: 500px;
-    margin-top: -5rem;
+    margin-top: -3rem;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
