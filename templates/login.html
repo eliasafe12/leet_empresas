@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leet empresas</title>
+    <title>Login - LeetEmpresas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -18,7 +18,7 @@ Controle seu estoque, organize suas contas e acompanhe suas vendas em tempo real
         <!-- FORMULÁRIO DE LOGIN -->
         <div class="login-section">
             <div class="login-container">
-                <h2>LOGIN</h2>
+                <h2>Login</h2>
                 
                 {% with messages = get_flashed_messages() %}
                   {% if messages %}
@@ -48,7 +48,7 @@ Controle seu estoque, organize suas contas e acompanhe suas vendas em tempo real
                 </form>
 
                 <div class="form-footer">
-                    <p><a href="/cadastro">Não possuo uma conta</a></p>
+                    <p>Não possui uma conta?<a href="/cadastro"> Criar conta</a></p>
                 </div>
             </div>
         </div>

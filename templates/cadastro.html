@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - LeetEmpresas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-wrapper">
+        <!-- LADO ESQUERDO: BRANDING DA EMPRESA -->
+        <div class="brand-section">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo LeetEmpresas" class="brand-logo">
+            <p class="brand-title">
+                Crie sua conta e comece a gerenciar sua empresa de forma simples e eficiente.
+            </p>
+        </div>
+
+        <!-- LADO DIREITO: FORMULÁRIO DE CADASTRO -->
+        <div class="login-section">
+            <div class="login-container">
+                <h2>Criar Conta</h2>
+
+                {% if error %}
+                    <div class="error-message">
+                        {{ error }}
+                    </div>
+                {% endif %}
+
+                <form action="{{ url_for('cadastro') }}" method="POST">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nome_empresa">Nome da Empresa</label>
+                        <input type="text" id="nome_empresa" name="nome_empresa" placeholder="Sua empresa" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="senha">Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="senha" name="senha" placeholder="Crie uma senha" required>
+                            <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar senha"></button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Cadastrar</button>
+
+                    <div class="form-footer">
+                        <p>Já possui uma conta? <a href="{{ url_for('login') }}">Fazer login</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
