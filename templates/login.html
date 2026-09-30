@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leet empresas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-wrapper">
+        <!-- LOGO DA EMPRESA -->
+        <div class="brand-section">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo da Empresa" class="brand-logo">
+            <p class="brand-subtitle">Simplificando a gestão da sua empresa em um só lugar.
+Controle seu estoque, organize suas contas e acompanhe suas vendas em tempo real.</p>
+        </div>
+
+        <!-- FORMULÁRIO DE LOGIN -->
+        <div class="login-section">
+            <div class="login-container">
+                <h2>LOGIN</h2>
+                
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <div class="flash-messages">
+                      {% for message in messages %}
+                        <p class="error-message">{{ message }}</p>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
+                <form action="/login" method="POST">
+                    <div class="form-group">
+                        <label for="usuario">Usuário</label>
+                        <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="senha">Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                            <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar senha"></button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </form>
+
+                <div class="form-footer">
+                    <p><a href="/cadastro">Não possuo uma conta</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
