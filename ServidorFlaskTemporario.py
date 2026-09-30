@@ -1,3 +1,9 @@
+# GERADO POR IA
+# GERADO POR IA
+# GERADO POR IA
+# GERADO POR IA
+# GERADO POR IA
+
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
@@ -10,15 +16,26 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Aqui no futuro validaremos com as classes de models (POO)
-        usuario = request.form.get('usuario')
+        email = request.form.get('email')
         senha = request.form.get('senha')
-        print(f"Tentativa de login -> Usuário: {usuario}, Senha: {senha}")
+        # Lógica de validação do login futuramente
+        return "Login efetuado com sucesso!"
         
-        # Após o login, futuramente redirecionamos para a interface do usuário
-        return f"Login recebido com sucesso para o usuário: {usuario}"
-
     return render_template('login.html')
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        nome_empresa = request.form.get('nome_empresa')
+        senha = request.form.get('senha')
+        
+        # Futuramente: salvar nome, nome_empresa e senha no banco de dados
+        return redirect(url_for('login'))
+        
+    return render_template('cadastro.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
