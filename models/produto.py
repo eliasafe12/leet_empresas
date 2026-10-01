@@ -1,5 +1,6 @@
 class Produto():
-    def __init__(self, nome, codigo, preco, quantidade):
+    def __init__(self, user_id, nome, codigo, preco, quantidade):
+        self.user_id = user_id
         self.nome = nome
         self.codigo = codigo
         self.preco = preco

@@ -1,6 +1,7 @@
 from datetime import datetime
 class Conta():
-    def __init__(self, descricao, valor, vencimento):
+    def __init__(self, user_id, descricao, valor, vencimento):
+        self.user_id = user_id
         self.descricao = descricao
         self.valor = valor
         self.vencimento = vencimento
