@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 class Movimentacao(ABC): # compra e venda
-    def __init__(self, produtos):
+    def __init__(self, user_id, produtos):
+        self.user_id = user_id
         self.produtos = list(produtos)
         self.preco_final = self.calcularPrecoFinal()
         tempo = datetime.now() # pega a data e hora da venda

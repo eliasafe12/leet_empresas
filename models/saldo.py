@@ -1,5 +1,6 @@
 class SaldoDiario():
-    def __init__(self, vendas, compras, contas):
+    def __init__(self, user_id, vendas, compras, contas):
+        self.user_id = user_id
         self.vendas = vendas
         self.compras = compras
         self.contas = contas
