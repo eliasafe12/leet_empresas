@@ -16,19 +16,43 @@ cursor.execute("""create table Produto (id_prod Integer Primary Key,
                                         quant_prod Integer Not Null)""")
 
 cursor.execute("""create table Conta (id_conta Integer Primary Key,
-                                        desc_conta Text Not Null,
+                                        descricao_conta Text Not Null,
                                         valor_conta Real Not Null,
                                         vencimento Text Not Null)""")
 
-cursor.execute("""create table Compra (id_conta Integer Primary Key,
+cursor.execute("""create table Compra (id_conta Integer Primary Key
                                         )""")
 
-cursor.execute("""create table Venda (id_venda Integer Primary Key,
-                                        foreign key (id_prodVendido) references Produto (id_prod),
+cursor.execute("""create table Venda (id_venda Integer Primary Key
                                         )""")
 
-cursor.execute("""create table Saldo (id_saldo Integer Primary Key,
-                                        )""")
+cursor.execute("""CREATE TABLE SaldoDiario (
+    saldo_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    valor_saldo REAL,
+    data_saldo TEXT Not Null
+);""")
+
+cursor.execute("""CREATE TABLE ProdutoVendido (
+    produto_id INTEGER,
+    venda_id INTEGER,
+
+    PRIMARY KEY (produto_id, venda_id),
+
+    FOREIGN KEY (produto_id) REFERENCES Produto(produto_id),
+    FOREIGN KEY (venda_id) REFERENCES Venda(venda_id)
+);""")
+
+cursor.execute("""CREATE TABLE ProdutoComprado (
+    produto_id INTEGER,
+    compra_id INTEGER,
+
+    PRIMARY KEY (produto_id, compra_id),
+
+    FOREIGN KEY (produto_id) REFERENCES Produto(produto_id),
+    FOREIGN KEY (compra_id) REFERENCES Compra(compra_id)
+);""")
+
+
 
 
 #CREATE TABLE Produto 
