@@ -83,7 +83,7 @@ def cadastrar_produto():
     valor_venda = request.form.get('valor_venda')
     quant = request.form.get('quantidade')
     cadastrar_produto = Produto(nome, float(valor_custo), float(valor_venda), int(quant))
-    insertProduto(cadastrar_produto.getInformacoes())
+    insertProduto(*cadastrar_produto.getInformacoes())
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-venda', methods=['POST'])

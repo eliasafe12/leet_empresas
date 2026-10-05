@@ -1,7 +1,6 @@
 class Produto:
-    def __init__(self, nome, codigo, valor_custo, valor_venda, quantidade):
+    def __init__(self, nome, valor_custo, valor_venda, quantidade):
         self.nome = nome
-        self.codigo = codigo
         self.valor_custo = valor_custo
         self.valor_venda = valor_venda
         self.quantidade = max(0, quantidade)
