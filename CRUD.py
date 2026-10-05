@@ -1,38 +1,47 @@
 import sqlite3
-
+from leet_connect import conectar
 # arquivo placeholder utilizado para testes por enquanto
 
-connector = sqlite3.connect('leet.db',detect_types=sqlite3.PARSE_DECLTYPES |
-                             sqlite3.PARSE_COLNAMES)
-cursor = connector.cursor()
-insertProd = "insert into Produto (nome_prod, valor_prod, quant_prod) Values (?, ?, ?)"
-cursor.execute(insertProd, ('Nome do Produto',25 ,100 ))
-cursor.execute("insert into Conta (descricao_conta, valor_conta, vencimento) Values ('aa',25 ,'01/01/2000' )")
-cursor.execute("insert into Compra (id_compra) Values (NULL)")
-cursor.execute("insert into Venda (id_venda) Values (NULL)")
-cursor.execute("insert into SaldoDiario (valor_saldo, data_saldo) Values (0,'01/01/2000')")
-cursor.execute("insert into ProdutoVendido Values (?,?)",(1,1))
-cursor.execute("insert into ProdutoComprado Values (?,?)",(1,1))
+def selectUsuario(user_id):
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("select * from Usuario where user_id = ?",(user_id,))
+    return cursor.fetchone()
+    connector.close()
+    cursor.close()
 
-connector.commit()
+def insertUsuario(user_id, nome_empresa, senha):
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("insert into Usuario (user_id, nome_empresa, senha) Values (?, ?, ?)",(user_id, nome_empresa, senha))
+    connector.commit()
+    connector.close()
 
-cursor.execute("select * from Produto")
-print(cursor.fetchall())
+def insertProduto(nome, valor_custo, valor_venda, quant):
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("insert into Produto (nome_prod, valor_custo, valor_venda, quant_prod) Values (?, ?, ?, ?)",(nome, valor_custo, valor_venda, quant))
+    connector.commit()
+    connector.close()
 
-cursor.execute("select * from Conta")
-print(cursor.fetchall())
+def selectProdutos():
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("select * from Produto")
+    return cursor.fetchall()
+    connector.close()
+    cursor.close()
 
-cursor.execute("select * from Compra")
-print(cursor.fetchall())
+def deleteProduto(id_prod):
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("delete from Produto where id_prod = ?",(id_prod,))
+    connector.commit()
+    connector.close()
 
-cursor.execute("select * from Venda")
-print(cursor.fetchall())
-
-cursor.execute("select * from SaldoDiario")
-print(cursor.fetchall())
-
-cursor.execute("select * from ProdutoVendido")
-print(cursor.fetchall())
-
-cursor.execute("select * from ProdutoComprado")
-print(cursor.fetchall())
+def updatePreco(id_prod, valor):
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("update Produto set valor_venda = ? where id_prod = ?", (valor, id_prod))
+    connector.commit()
+    connector.close()

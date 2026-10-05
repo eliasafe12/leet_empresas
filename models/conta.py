@@ -8,7 +8,7 @@ class Conta():
 
     def avisarVencimento(self):
         tempo = datetime.now()
-        if self.vencimento == tempo.strftime('%d/%m/%Y'):
+        if self.vencimento == tempo.strftime('%Y-%m-%d'):
             return f"{self.descricao} vence hoje!"
     
     def getValor(self): return self.valor # para fazer o saldo diario

@@ -100,8 +100,8 @@
                     <h3>Cadastrar Novo Produto</h3>
                     <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
                         <input type="text" name="nome" placeholder="Nome do Produto" required>
-                        <input type="text" name="codigo" placeholder="Código" required>
-                        <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required>
+                        <input type="text" name="valor_custo" placeholder="Preço de Custo (R$)" required>
+                        <input type="number" step="0.01" name="valor_venda" placeholder="Preço de Venda (R$)" required>
                         <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
                         
                         <!-- Captura de Foto pela Câmara -->
@@ -135,12 +135,13 @@
                     {% for produto in produtos %}
                         <div class="product-card">
                             <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome }}">
-                            <h4>{{ produto.nome }}</h4>
-                            <p><strong>Código:</strong> {{ produto.codigo }}</p>
-                            <p><strong>Qtd:</strong> {{ produto.quantidade }}</p>
-                            <p><strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}</p>
+                            <h4>{{ produto["nome_prod"] }}</h4>
+                            <p><strong>Código:</strong> {{ produto["id_prod"] }}</p>
+                            <p><strong>Qtd:</strong> {{ produto["quant_prod"] }}</p>
+                            <p><strong>Preço de Venda:</strong> R$ {{ "%.2f"|format(produto["valor_venda"]) }}</p>
+                            <p><strong>Preço de Custo:</strong> R$ {{ "%.2f"|format(produto["valor_custo"]) }}</p>
                             <div class="product-card-actions">
-                                <button onclick="editarPreco('{{ produto.codigo }}')" class="btn-sm">Editar Preço</button>
+                                <button onclick="editarPreco('{{ produto.id_prod }}')" class="btn-sm">Editar Preço</button>
                                 <button class="btn-sm btn-danger">Remover</button>
                             </div>
                         </div>
