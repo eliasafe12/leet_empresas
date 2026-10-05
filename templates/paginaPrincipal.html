@@ -361,9 +361,9 @@
                     <tbody>
                         {% for conta in contas %}
                             <tr>
-                                <td>{{ conta.descricao }}</td>
-                                <td>R$ {{ "%.2f"|format(conta.valor) }}</td>
-                                <td>{{ conta.vencimento }}</td>
+                                <td>{{ conta["descricao_conta"] }}</td>
+                                <td>R$ {{ "%.2f"|format(conta["valor_conta"]) }}</td>
+                                <td>{{ conta["vencimento"] }}</td>
                             </tr>
                         {% else %}
                             <tr>
@@ -538,9 +538,9 @@
                             <tbody>
                                 {% for conta in contas %}
                                     <tr>
-                                        <td>{{ conta.descricao }}</td>
-                                        <td>R$ {{ "%.2f"|format(conta.valor) }}</td>
-                                        <td>{{ conta.vencimento }}</td>
+                                        <td>{{ conta["descricao_conta"] }}</td>
+                                        <td>R$ {{ "%.2f"|format(conta["valor_conta"]) }}</td>
+                                        <td>{{ conta["vencimento"] }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

@@ -1,7 +1,6 @@
 from datetime import datetime
 class Conta():
-    def __init__(self, user_id, descricao, valor, vencimento):
-        self.user_id = user_id
+    def __init__(self, descricao, valor, vencimento):
         self.descricao = descricao
         self.valor = valor
         self.vencimento = vencimento
@@ -10,6 +9,9 @@ class Conta():
         tempo = datetime.now()
         if self.vencimento == tempo.strftime('%Y-%m-%d'):
             return f"{self.descricao} vence hoje!"
+    
+    def getInformacoes(self):
+        return self.descricao, self.valor, self.vencimento
     
     def getValor(self): return self.valor # para fazer o saldo diario
 

@@ -62,6 +62,7 @@ def dashboard():
         return redirect(url_for("login"))
     
     produtos = selectProdutos()
+    contas = selectContas()
     return render_template(
         "paginaPrincipal.html",
         nome_empresa=session.get("empresa"),
@@ -71,6 +72,7 @@ def dashboard():
         total_vendas_hoje=0,
         total_compras_hoje=0,
         produtos=produtos,
+        contas=contas,
         notificacoes=[]
     )
 
@@ -84,14 +86,17 @@ def cadastrar_produto():
     insertProduto(cadastrar_produto.getInformacoes())
     return redirect(url_for('dashboard'))
 
-@app.route('/repor-estoque', methods=['POST'])
-def repor_estoque():
-    # Adicione aqui a lógica para repor estoque
-    return redirect(url_for('dashboard'))
-
 @app.route('/registrar-venda', methods=['POST'])
 def registrar_venda():
-    # Adicione aqui a lógica para registrar vendas
+    codigo = request.form.get('codigo')
+    quantidade = request.form.get('quantidade')
+    produto = buscarProduto(codigo)
+    if not produto:
+        return "Produto não encontrado", 404
+    if int(quantidade) > produto["quant_prod"]:
+        return "Quantidade insuficiente em estoque", 400
+    cadastrar_venda = Venda(produto["id_prod"], produto["valor_venda"], int(quantidade))
+    insertVenda(*cadastrar_venda.getInformacoes())
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-compra', methods=['POST'])
@@ -101,7 +106,11 @@ def registrar_compra():
 
 @app.route('/registrar-conta', methods=['POST'])
 def registrar_conta():
-    # Adicione aqui a lógica para registrar contas a pagar
+    descricao = request.form.get('descricao')
+    valor = request.form.get('valor')
+    vencimento = request.form.get('vencimento')
+    cadastrar_conta = Conta(descricao, float(valor), vencimento)
+    insertConta(*cadastrar_conta.getInformacoes())
     return redirect(url_for('dashboard'))
 
 # ROTA DE LOGOUT
