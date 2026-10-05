@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Ajuste para centralizar os formulários na aba de Contas / Compras */
         .forms-container-center {
             display: flex;
             flex-direction: column;
@@ -20,7 +19,6 @@
             max-width: 500px;
             margin: 0 auto;
         }
-        /* Estilo da área de câmara */
         .camera-container {
             display: flex;
             flex-direction: column;
@@ -200,7 +198,7 @@
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-        // Lógica de Troca de Abas
+        // Troca de Abas
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab-content");
@@ -215,7 +213,7 @@
             evt.currentTarget.classList.add("active");
         }
 
-        // Gráfico do Dia Atual (Com conversão segura para o JS)
+        // Gráfico do Dia Atual
         const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
         const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
 
@@ -249,7 +247,7 @@
             }
         });
 
-        // Lógica de Captura da Câmera
+        // Captura da Câmera
         let streamCam = null;
 
         async function iniciarCamera() {
