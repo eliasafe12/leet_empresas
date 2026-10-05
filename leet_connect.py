@@ -6,6 +6,8 @@ connector = sqlite3.connect('leet.db',detect_types=sqlite3.PARSE_DECLTYPES |
                              sqlite3.PARSE_COLNAMES)
 cursor = connector.cursor()
 
+cursor.execute("PRAGMA foreign_keys = ON;")
+
 #tipos de variaveis sqlite:
 #NULL
 #INTEGER
@@ -23,7 +25,7 @@ cursor.execute("""create table Conta (id_conta Integer Primary Key,
                                         valor_conta Real Not Null,
                                         vencimento Text Not Null)""")
 
-cursor.execute("""create table Compra (id_conta Integer Primary Key
+cursor.execute("""create table Compra (id_compra Integer Primary Key
                                         )""")
 
 cursor.execute("""create table Venda (id_venda Integer Primary Key
@@ -41,8 +43,8 @@ cursor.execute("""CREATE TABLE ProdutoVendido (
 
     PRIMARY KEY (produto_id, venda_id),
 
-    FOREIGN KEY (produto_id) REFERENCES Produto(produto_id),
-    FOREIGN KEY (venda_id) REFERENCES Venda(venda_id)
+    FOREIGN KEY (produto_id) REFERENCES Produto(id_prod),
+    FOREIGN KEY (venda_id) REFERENCES Venda(id_venda)
 );""")
 
 cursor.execute("""CREATE TABLE ProdutoComprado (
@@ -51,11 +53,12 @@ cursor.execute("""CREATE TABLE ProdutoComprado (
 
     PRIMARY KEY (produto_id, compra_id),
 
-    FOREIGN KEY (produto_id) REFERENCES Produto(produto_id),
-    FOREIGN KEY (compra_id) REFERENCES Compra(compra_id)
+    FOREIGN KEY (produto_id) REFERENCES Produto(id_prod),
+    FOREIGN KEY (compra_id) REFERENCES Compra(id_compra)
 );""")
 
 
 
+connector.commit()
 cursor.close()
 connector.close()
