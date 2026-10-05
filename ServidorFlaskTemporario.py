@@ -1,5 +1,4 @@
 # =========================================================
-# CÓDIGO GERADO POR INTELIGÊNCIA ARTIFICIAL (IA)
 # Servidor Flask Completo para LeetEmpresas
 # =========================================================
 
@@ -14,21 +13,27 @@ produtos_db = [
         "codigo": "10101010",
         "quantidade": 50,
         "preco": 5.00,
+        "valor_custo": 2.50,
         "foto_url": None
     }
 ]
 
 # Registos temporários de transações
 vendas_db = [
-    {"codigo": "10101010", "quantidade": 10, "valor_total": 50.00}  # 1 Venda (R$ 50,00)
+    {"codigo": "10101010", "quantidade": 10, "valor_total": 50.00, "data": "2026-10-05"}
 ]
 
 compras_db = [
-    {"codigo": "10101010", "quantidade": 20, "valor_total": 100.00}, # Compra #1 (R$ 100,00)
-    {"codigo": "10101010", "quantidade": 10, "valor_total": 50.00}   # Compra #2 (R$ 50,00)
+    {"codigo": "10101010", "quantidade": 20, "valor_total": 100.00, "data": "2026-10-05"},
+    {"codigo": "10101010", "quantidade": 10, "valor_total": 50.00, "data": "2026-10-05"}
 ]
 
-# Avisos do sistema (incluindo a conta de luz)
+# Registos temporários de contas a pagar
+contas_db = [
+    {"descricao": "Energia Elétrica / Luz", "valor": 250.00, "vencimento": "2026-10-15"}
+]
+
+# Avisos do sistema
 notificacoes_db = [
     "⚠️ AVISO: Existe uma conta de luz pendente com vencimento próximo!",
     "ℹ️ 1 venda registrada hoje (R$ 50,00).",
@@ -49,10 +54,13 @@ def dashboard():
 
     return render_template(
         'paginaPrincipal.html',
-        nome_empresa="LeetEmpresas Demo",
-        nome_usuario="Administrador",
+        nome_empresa="Minha Empresa",
+        nome_usuario="Usuário",
         total_produtos=len(produtos_db),
         produtos=produtos_db,
+        vendas=vendas_db,       # <--- Passado para a aba de Vendas
+        compras=compras_db,     # <--- Passado para a aba de Compras
+        contas=contas_db,       # <--- Passado para a aba de Contas e Dashboard
         saldo_dia=saldo_dia,
         total_vendas_hoje=total_vendas,
         total_compras_hoje=total_compras,
@@ -62,20 +70,17 @@ def dashboard():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Ao enviar o formulário de login, redireciona para o painel
         return redirect(url_for('dashboard'))
     return render_template('login.html')
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
-        # Ao criar a conta, vai para a tela de login
         return redirect(url_for('login'))
     return render_template('cadastro.html')
 
 @app.route('/logout')
 def logout():
-    # Redireciona o utilizador para a tela de login
     return redirect(url_for('login'))
 
 # ---------------------------------------------------------
@@ -85,8 +90,9 @@ def logout():
 @app.route('/cadastrar-produto', methods=['POST'])
 def cadastrar_produto():
     nome = request.form.get('nome')
-    codigo = request.form.get('codigo')
-    preco = float(request.form.get('preco', 0))
+    codigo = request.form.get('codigo', '10101010')
+    valor_venda = float(request.form.get('valor_venda', 0))
+    valor_custo = float(request.form.get('valor_custo', 0))
     quantidade = int(request.form.get('quantidade', 0))
     foto_base64 = request.form.get('foto_base64')
 
@@ -94,7 +100,8 @@ def cadastrar_produto():
         "nome": nome,
         "codigo": codigo,
         "quantidade": quantidade,
-        "preco": preco,
+        "preco": valor_venda,
+        "valor_custo": valor_custo,
         "foto_url": foto_base64 if foto_base64 else None
     })
     
@@ -114,7 +121,7 @@ def registrar_venda():
             break
             
     valor_total = preco * qtd
-    vendas_db.append({"codigo": codigo, "quantidade": qtd, "valor_total": valor_total})
+    vendas_db.append({"codigo": codigo, "quantidade": qtd, "valor_total": valor_total, "data": "2026-10-05"})
     notificacoes_db.insert(0, f"💰 Venda efetuada: {qtd}x item ({codigo}) - Total: R$ {valor_total:.2f}")
     
     return redirect(url_for('dashboard'))
@@ -127,7 +134,7 @@ def registrar_compra():
     custo_unitario = 5.00
     valor_total = custo_unitario * qtd
     
-    compras_db.append({"codigo": codigo, "quantidade": qtd, "valor_total": valor_total})
+    compras_db.append({"codigo": codigo, "quantidade": qtd, "valor_total": valor_total, "data": "2026-10-05"})
     
     for p in produtos_db:
         if p['codigo'] == codigo:
@@ -142,6 +149,13 @@ def registrar_conta():
     descricao = request.form.get('descricao')
     valor = float(request.form.get('valor', 0))
     vencimento = request.form.get('vencimento')
+    
+    # Adiciona a conta à base de dados de contas
+    contas_db.append({
+        "descricao": descricao,
+        "valor": valor,
+        "vencimento": vencimento
+    })
     
     notificacoes_db.insert(0, f"⚠️ Nova conta registrada: {descricao} - R$ {valor:.2f} (Vencimento: {vencimento})")
     return redirect(url_for('dashboard'))
