@@ -23,7 +23,7 @@ while True:
 10 - Sair
 '''))
     match a:
-        case 1:
+        case 1: # insert
             nome, codigo, preco, quantidade = list(map(str, input("Nome, Código, Preço e Quantidade: ").split())) 
             for i in produtos: # verifica se não tem um produto com o mesmo código
                 if i.codigo == int(codigo):
@@ -35,12 +35,12 @@ while True:
                 print("Produto Cadastrado!")
             else: print("Código já existente")
             
-        case 2:
+        case 2: # select
             print("Produtos:")
             for i in produtos:
                 print(i)    
         
-        case 3:
+        case 3: # delete
             print("Produtos:")
             for i in produtos:
                 print(i)    
@@ -52,7 +52,7 @@ while True:
                     break
             else: print("Produto não encontrado!")
 
-        case 4:
+        case 4:# update
             print("Produtos:")
             for i in produtos:
                 print(i)    
@@ -66,7 +66,7 @@ while True:
                     break
             else: print("Produto não encontrado!")
 
-        case 5:
+        case 5: # update e insert
             venda_produtos = []
             quant_produtos = int(input("Quantos produtos foram vendidos? "))
             for i in range(quant_produtos):
@@ -82,7 +82,7 @@ while True:
             vendas.append(Venda(venda_produtos))
             print(vendas[-1])
 
-        case 6:
+        case 6: # update e insert
             compra_produtos = []
             quant_produtos = int(input("Quantos produtos foram comprados? "))
             for i in range(quant_produtos):
@@ -98,19 +98,19 @@ while True:
             compras.append(Compra(compra_produtos))
             print(compras[-1])
             
-        case 7: 
+        case 7: # insert e delete
             descricao = input("Qual a conta? ")
             valor = float(input("Qual o valor? "))
             vencimento = input("Quando vence? ")
             contas.append(Conta(descricao, valor, vencimento))
             print("Conta cadastrada!")
 
-        case 8:
+        case 8: # select
             print("Contas")
             for i in contas:
                 print(i)
 
-        case 9:
+        case 9: #
             saldo_diario = SaldoDiario(vendas,compras,contas)
             print(saldo_diario)
 

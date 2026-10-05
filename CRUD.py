@@ -5,8 +5,8 @@ import sqlite3
 connector = sqlite3.connect('leet.db',detect_types=sqlite3.PARSE_DECLTYPES |
                              sqlite3.PARSE_COLNAMES)
 cursor = connector.cursor()
-
-cursor.execute("insert into Produto (nome_prod, valor_prod, quant_prod) Values ('Nome do Produto',25 ,100 )")
+insertProd = "insert into Produto (nome_prod, valor_prod, quant_prod) Values (?, ?, ?)"
+cursor.execute(insertProd, ('Nome do Produto',25 ,100 ))
 cursor.execute("insert into Conta (descricao_conta, valor_conta, vencimento) Values ('aa',25 ,'01/01/2000' )")
 cursor.execute("insert into Compra (id_compra) Values (NULL)")
 cursor.execute("insert into Venda (id_venda) Values (NULL)")
