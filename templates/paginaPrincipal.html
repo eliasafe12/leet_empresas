@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Principal - LeetEmpresas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Ajuste para centralizar os formulários na aba de Contas / Compras */
+        .forms-container-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+        }
+        .forms-container-center .form-card {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        /* Estilo da área de câmara */
+        .camera-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        #video-preview, #photo-preview {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #121212;
+            border: 1px solid #3f4248;
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <!-- CABEÇALHO -->
+        <header class="main-header">
+            <div class="header-left">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo LeetEmpresas" class="header-logo">
+            </div>
+            <div class="header-right">
+                <span class="user-info"><strong>Empresa:</strong> {{ nome_empresa | default('Minha Empresa') }}</span>
+                <span class="user-info"><strong>Nome:</strong> {{ nome_usuario | default('Usuário') }}</span>
+                <a href="/logout" class="btn-logout">Sair</a>
+            </div>
+        </header>
+
+    <!-- BARRA DE ABAS -->
+    <nav class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-dashboard')">Dashboard</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-produtos')">Gerenciar Produtos</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-vendas')">Gerenciar Vendas</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-contas')">Gerenciar Contas / Compras</button>
+    </nav>
+
+    <main class="content-container">
+
+        <!-- ABA 1: DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="dash-card">
+                    <h3>Produtos Cadastrados</h3>
+                    <p class="card-number">{{ total_produtos | default(0) }}</p>
+                </div>
+                <div class="dash-card">
+                    <h3>Saldo do Dia</h3>
+                    <p class="card-number positive">R$ {{ "%.2f"|format(saldo_dia | default(0.0)) }}</p>
+                </div>
+            </div>
+
+            <div class="dash-card graph-card">
+                <h3>Comparativo do Dia: Compras vs Vendas (R$)</h3>
+                <canvas id="chartComprasVendas"></canvas>
+            </div>
+
+            <div class="dash-card notifications-card">
+                <h3>Avisos e Notificações</h3>
+                <ul>
+                    {% if notificacoes %}
+                        {% for aviso in notificacoes %}
+                            <li>{{ aviso }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>Nenhuma notificação no momento.</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </section>
+
+        <!-- ABA 2: GERENCIAR PRODUTOS -->
+        <section id="tab-produtos" class="tab-content">
+            <div class="forms-container">
+                <!-- Form 1: Novo Produto -->
+                <div class="form-card">
+                    <h3>Cadastrar Novo Produto</h3>
+                    <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
+                        <input type="text" name="nome" placeholder="Nome do Produto" required>
+                        <input type="text" name="codigo" placeholder="Código" required>
+                        <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required>
+                        <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
+                        
+                        <!-- Captura de Foto pela Câmara -->
+                        <div class="camera-container">
+                            <video id="video-preview" style="display: none;" autoplay playsinline></video>
+                            <img id="photo-preview" src="{{ url_for('static', filename='img/logo.png') }}" alt="Preview da Foto">
+                            <input type="hidden" name="foto_base64" id="foto_base64">
+                            
+                            <button type="button" id="btn-camera" class="btn-secondary" onclick="iniciarCamera()">Tirar Foto do Produto</button>
+                            <button type="button" id="btn-capturar" class="btn-primary" style="display: none;" onclick="capturarFoto()">Capturar Foto</button>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Salvar Produto</button>
+                    </form>
+                </div>
+
+                <!-- Form 2: Repor Estoque -->
+                <div class="form-card">
+                    <h3>Acrescentar Estoque</h3>
+                    <form action="/repor-estoque" method="POST">
+                        <input type="text" name="codigo" placeholder="Código do Produto" required>
+                        <input type="number" name="quantidade" placeholder="Quantidade a Adicionar" required>
+                        <button type="submit" class="btn-primary">Adicionar ao Estoque</button>
+                    </form>
+                </div>
+            </div>
+
+            <h3 class="section-title">Produtos Cadastrados</h3>
+            <div class="products-grid">
+                {% if produtos %}
+                    {% for produto in produtos %}
+                        <div class="product-card">
+                            <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome }}">
+                            <h4>{{ produto.nome }}</h4>
+                            <p><strong>Código:</strong> {{ produto.codigo }}</p>
+                            <p><strong>Qtd:</strong> {{ produto.quantidade }}</p>
+                            <p><strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}</p>
+                            <div class="product-card-actions">
+                                <button onclick="editarPreco('{{ produto.codigo }}')" class="btn-sm">Editar Preço</button>
+                                <button class="btn-sm btn-danger">Remover</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #888;">Nenhum produto cadastrado ainda.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ABA 3: GERENCIAR VENDAS -->
+        <section id="tab-vendas" class="tab-content">
+            <div class="forms-container-center">
+                <div class="form-card">
+                    <h3>Registrar Nova Venda</h3>
+                    <form action="/registrar-venda" method="POST">
+                        <label>Código do Produto:</label>
+                        <input type="text" name="codigo" placeholder="Código" required>
+                        
+                        <label>Quantidade Vendida:</label>
+                        <input type="number" name="quantidade" placeholder="Quantidade" required>
+                        
+                        <button type="submit" class="btn-primary">Concluir Venda</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: GERENCIAR CONTAS E COMPRAS -->
+        <section id="tab-contas" class="tab-content">
+            <div class="forms-container-center">
+                <div class="form-card">
+                    <h3>Registrar Compra de Estoque</h3>
+                    <form action="/registrar-compra" method="POST">
+                        <input type="text" name="codigo" placeholder="Código do Produto" required>
+                        <input type="number" name="quantidade" placeholder="Quantidade Comprada" required>
+                        <button type="submit" class="btn-primary">Registrar Compra</button>
+                    </form>
+                </div>
+
+                <div class="form-card">
+                    <h3>Outras Contas a Pagar</h3>
+                    <form action="/registrar-conta" method="POST">
+                        <input type="text" name="descricao" placeholder="Qual a conta? (Ex: Luz, Internet)" required>
+                        <input type="number" step="0.01" name="valor" placeholder="Qual o valor? (R$)" required>
+                        <label style="color: #fff; display: block; margin-top: 0.5rem;">Quando vence?</label>
+                        <input type="date" name="vencimento" required>
+                        <button type="submit" class="btn-primary">Cadastrar Conta</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Lógica de Troca de Abas
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Gráfico do Dia Atual (Com conversão segura para o JS)
+        const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
+        const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
+
+        const ctx = document.getElementById('chartComprasVendas').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Hoje'],
+                datasets: [
+                    {
+                        label: 'Vendas (R$)',
+                        data: [totalVendas],
+                        backgroundColor: '#22c55e'
+                    },
+                    {
+                        label: 'Compras (R$)',
+                        data: [totalCompras],
+                        backgroundColor: '#ef4444'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#ffffff' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#ffffff' } },
+                    y: { ticks: { color: '#ffffff' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Lógica de Captura da Câmera
+        let streamCam = null;
+
+        async function iniciarCamera() {
+            try {
+                streamCam = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video-preview');
+                video.srcObject = streamCam;
+                video.style.display = 'block';
+                document.getElementById('photo-preview').style.display = 'none';
+                document.getElementById('btn-camera').style.display = 'none';
+                document.getElementById('btn-capturar').style.display = 'block';
+            } catch (err) {
+                alert('Não foi possível acessar a câmara: ' + err.message);
+            }
+        }
+
+        function capturarFoto() {
+            const video = document.getElementById('video-preview');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 300;
+            canvas.height = video.videoHeight || 200;
+            
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const fotoDataUrl = canvas.toDataURL('image/png');
+            document.getElementById('foto_base64').value = fotoDataUrl;
+            
+            const photoPreview = document.getElementById('photo-preview');
+            photoPreview.src = fotoDataUrl;
+            photoPreview.style.display = 'block';
+            video.style.display = 'none';
+            
+            if (streamCam) {
+                streamCam.getTracks().forEach(track => track.stop());
+            }
+            
+            document.getElementById('btn-capturar').style.display = 'none';
+            document.getElementById('btn-camera').style.display = 'block';
+            document.getElementById('btn-camera').innerText = 'Tirar Outra Foto';
+        }
+    </script>
+</body>
+</html>
