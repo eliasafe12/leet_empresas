@@ -87,7 +87,7 @@ def cadastrar_produto():
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-venda', methods=['POST'])
-def registrar_venda():
+def registrar_venda(): # ainda não está funcionando kkk
     codigo = request.form.get('codigo')
     quantidade = request.form.get('quantidade')
     produto = buscarProduto(codigo)
