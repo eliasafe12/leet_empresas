@@ -94,6 +94,7 @@
 
     <main class="content-container">
 
+        <!-- DASHBOARD -->
         <section id="tab-dashboard" class="tab-content active">
             <div class="dashboard-grid">
                 <div class="dash-card">
@@ -127,17 +128,18 @@
             </div>
         </section>
 
+        <!-- GERENCIAR PRODUTOS -->
         <section id="tab-produtos" class="tab-content">
-<<<<<<< HEAD
             <div class="produtos-grid-layout">
                 
+                <!-- Coluna Esquerda: Formulários -->
                 <div class="produtos-col-esquerda">
                     <div class="form-card">
                         <h3>Cadastrar Novo Produto</h3>
                         <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
                             <input type="text" name="nome" placeholder="Nome do Produto" required>
-                            <input type="text" name="codigo" placeholder="Código" required>
-                            <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required>
+                            <input type="text" name="valor_custo" placeholder="Preço de Custo (R$)" required>
+                            <input type="number" step="0.01" name="valor_venda" placeholder="Preço de Venda (R$)" required>
                             <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
                             
                             <div class="camera-container">
@@ -147,64 +149,23 @@
                                 
                                 <button type="button" id="btn-camera" class="btn-secondary" onclick="iniciarCamera()">Tirar Foto do Produto</button>
                                 <button type="button" id="btn-capturar" class="btn-primary" style="display: none;" onclick="capturarFoto()">Capturar Foto</button>
-=======
-            <div class="forms-container">
-                <!-- Form 1: Novo Produto -->
-                <div class="form-card">
-                    <h3>Cadastrar Novo Produto</h3>
-                    <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
-                        <input type="text" name="nome" placeholder="Nome do Produto" required>
-                        <input type="text" name="valor_custo" placeholder="Preço de Custo (R$)" required>
-                        <input type="number" step="0.01" name="valor_venda" placeholder="Preço de Venda (R$)" required>
-                        <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
-                        
-                        <!-- Captura de Foto pela Câmara -->
-                        <div class="camera-container">
-                            <video id="video-preview" style="display: none;" autoplay playsinline></video>
-                            <img id="photo-preview" src="{{ url_for('static', filename='img/logo.png') }}" alt="Preview da Foto">
-                            <input type="hidden" name="foto_base64" id="foto_base64">
-                            
-                            <button type="button" id="btn-camera" class="btn-secondary" onclick="iniciarCamera()">Tirar Foto do Produto</button>
-                            <button type="button" id="btn-capturar" class="btn-primary" style="display: none;" onclick="capturarFoto()">Capturar Foto</button>
-                        </div>
-
-                        <button type="submit" class="btn-primary">Salvar Produto</button>
-                    </form>
-                </div>
-
-                <!-- Form 2: Repor Estoque -->
-                <div class="form-card">
-                    <h3>Acrescentar Estoque</h3>
-                    <form action="/repor-estoque" method="POST">
-                        <input type="text" name="codigo" placeholder="Código do Produto" required>
-                        <input type="number" name="quantidade" placeholder="Quantidade a Adicionar" required>
-                        <button type="submit" class="btn-primary">Adicionar ao Estoque</button>
-                    </form>
-                </div>
-            </div>
-
-            <h3 class="section-title">Produtos Cadastrados</h3>
-            <div class="products-grid">
-                {% if produtos %}
-                    {% for produto in produtos %}
-                        <div class="product-card">
-                            <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome }}">
-                            <h4>{{ produto["nome_prod"] }}</h4>
-                            <p><strong>Código:</strong> {{ produto["id_prod"] }}</p>
-                            <p><strong>Qtd:</strong> {{ produto["quant_prod"] }}</p>
-                            <p><strong>Preço de Venda:</strong> R$ {{ "%.2f"|format(produto["valor_venda"]) }}</p>
-                            <p><strong>Preço de Custo:</strong> R$ {{ "%.2f"|format(produto["valor_custo"]) }}</p>
-                            <div class="product-card-actions">
-                                <button onclick="editarPreco('{{ produto.id_prod }}')" class="btn-sm">Editar Preço</button>
-                                <button class="btn-sm btn-danger">Remover</button>
->>>>>>> d831f77ef449b8690bd68c67755b4058269e3f77
                             </div>
 
                             <button type="submit" class="btn-primary">Salvar Produto</button>
                         </form>
                     </div>
+
+                    <div class="form-card" style="margin-top: 1.5rem;">
+                        <h3>Acrescentar Estoque</h3>
+                        <form action="/repor-estoque" method="POST">
+                            <input type="text" name="codigo" placeholder="Código do Produto" required>
+                            <input type="number" name="quantidade" placeholder="Quantidade a Adicionar" required>
+                            <button type="submit" class="btn-primary">Adicionar ao Estoque</button>
+                        </form>
+                    </div>
                 </div>
 
+                <!-- Coluna Direita: Lista de Produtos -->
                 <div class="produtos-col-direita">
                     <h3 class="section-title">Produtos Cadastrados</h3>
 
@@ -212,13 +173,16 @@
                         {% if produtos %}
                             {% for produto in produtos %}
                                 <div class="product-card">
-                                    <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome }}">
-                                    <h4>{{ produto.nome }}</h4>
-                                    <p><strong>Código:</strong> {{ produto.codigo }}</p>
-                                    <p><strong>Qtd:</strong> {{ produto.quantidade }}</p>
-                                    <p><strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}</p>
+                                    <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome_prod or produto.nome }}">
+                                    <h4>{{ produto.nome_prod or produto.nome }}</h4>
+                                    <p><strong>Código:</strong> {{ produto.id_prod or produto.codigo }}</p>
+                                    <p><strong>Qtd:</strong> {{ produto.quant_prod or produto.quantidade }}</p>
+                                    <p><strong>Preço Venda:</strong> R$ {{ "%.2f"|format(produto.valor_venda or produto.preco or 0) }}</p>
+                                    {% if produto.valor_custo %}
+                                        <p><strong>Preço Custo:</strong> R$ {{ "%.2f"|format(produto.valor_custo) }}</p>
+                                    {% endif %}
                                     <div class="product-card-actions">
-                                        <button onclick="editarPreco('{{ produto.codigo }}')" class="btn-sm">Editar Preço</button>
+                                        <button onclick="editarPreco('{{ produto.id_prod or produto.codigo }}')" class="btn-sm">Editar Preço</button>
                                         <button class="btn-sm btn-danger">Remover</button>
                                     </div>
                                 </div>
@@ -232,6 +196,7 @@
             </div>
         </section>
 
+        <!-- GERENCIAR VENDAS -->
         <section id="tab-vendas" class="tab-content">
             <div class="forms-container-center">
                 <div class="form-card">
@@ -249,6 +214,7 @@
             </div>
         </section>
 
+        <!-- GERENCIAR CONTAS -->
         <section id="tab-contas" class="tab-content">
             <div class="forms-container-center">
                 <div class="form-card">
