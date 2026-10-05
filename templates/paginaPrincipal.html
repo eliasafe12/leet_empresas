@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Principal - LeetEmpresas</title>
+    <title>LeetEmpresas - Página Principal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -34,23 +34,57 @@
             background-color: #121212;
             border: 1px solid #3f4248;
         }
+
+        .produtos-grid-layout {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            width: 100%;
+        }
+        .produtos-col-esquerda {
+            flex: 0 0 420px;
+            max-width: 420px;
+        }
+        .produtos-col-direita {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .produtos-col-direita .section-title {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #ffffff;
+            border-bottom: 1px solid #3f4248;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .produtos-grid-layout {
+                flex-direction: column;
+            }
+            .produtos-col-esquerda {
+                flex: 1;
+                max-width: 100%;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body class="dashboard-body">
 
-    <!-- CABEÇALHO -->
-        <header class="main-header">
-            <div class="header-left">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo LeetEmpresas" class="header-logo">
-            </div>
-            <div class="header-right">
-                <span class="user-info"><strong>Empresa:</strong> {{ nome_empresa | default('Minha Empresa') }}</span>
-                <span class="user-info"><strong>Nome:</strong> {{ nome_usuario | default('Usuário') }}</span>
-                <a href="/logout" class="btn-logout">Sair</a>
-            </div>
-        </header>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo LeetEmpresas" class="header-logo">
+        </div>
+        <div class="header-right">
+            <span class="user-info"><strong>Empresa:</strong> {{ nome_empresa | default('Minha Empresa') }}</span>
+            <span class="user-info"><strong>Nome:</strong> {{ nome_usuario | default('Usuário') }}</span>
+            <a href="/logout" class="btn-logout">Sair</a>
+        </div>
+    </header>
 
-    <!-- BARRA DE ABAS -->
     <nav class="tabs-nav">
         <button class="tab-btn active" onclick="openTab(event, 'tab-dashboard')">Dashboard</button>
         <button class="tab-btn" onclick="openTab(event, 'tab-produtos')">Gerenciar Produtos</button>
@@ -60,7 +94,6 @@
 
     <main class="content-container">
 
-        <!-- ABA 1: DASHBOARD -->
         <section id="tab-dashboard" class="tab-content active">
             <div class="dashboard-grid">
                 <div class="dash-card">
@@ -69,7 +102,9 @@
                 </div>
                 <div class="dash-card">
                     <h3>Saldo do Dia</h3>
-                    <p class="card-number positive">R$ {{ "%.2f"|format(saldo_dia | default(0.0)) }}</p>
+                    <p class="card-number {% if saldo_dia < 0 %}negative{% elif saldo_dia == 0 %}zero{% else %}positive{% endif %}">
+                        R$ {{ "%.2f"|format(saldo_dia | default(0.0)) }}
+                    </p>
                 </div>
             </div>
 
@@ -79,7 +114,7 @@
             </div>
 
             <div class="dash-card notifications-card">
-                <h3>Avisos e Notificações</h3>
+                <h3>Notificações</h3>
                 <ul>
                     {% if notificacoes %}
                         {% for aviso in notificacoes %}
@@ -92,66 +127,59 @@
             </div>
         </section>
 
-        <!-- ABA 2: GERENCIAR PRODUTOS -->
         <section id="tab-produtos" class="tab-content">
-            <div class="forms-container">
-                <!-- Form 1: Novo Produto -->
-                <div class="form-card">
-                    <h3>Cadastrar Novo Produto</h3>
-                    <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
-                        <input type="text" name="nome" placeholder="Nome do Produto" required>
-                        <input type="text" name="codigo" placeholder="Código" required>
-                        <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required>
-                        <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
-                        
-                        <!-- Captura de Foto pela Câmara -->
-                        <div class="camera-container">
-                            <video id="video-preview" style="display: none;" autoplay playsinline></video>
-                            <img id="photo-preview" src="{{ url_for('static', filename='img/logo.png') }}" alt="Preview da Foto">
-                            <input type="hidden" name="foto_base64" id="foto_base64">
+            <div class="produtos-grid-layout">
+                
+                <div class="produtos-col-esquerda">
+                    <div class="form-card">
+                        <h3>Cadastrar Novo Produto</h3>
+                        <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
+                            <input type="text" name="nome" placeholder="Nome do Produto" required>
+                            <input type="text" name="codigo" placeholder="Código" required>
+                            <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required>
+                            <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
                             
-                            <button type="button" id="btn-camera" class="btn-secondary" onclick="iniciarCamera()">Tirar Foto do Produto</button>
-                            <button type="button" id="btn-capturar" class="btn-primary" style="display: none;" onclick="capturarFoto()">Capturar Foto</button>
-                        </div>
-
-                        <button type="submit" class="btn-primary">Salvar Produto</button>
-                    </form>
-                </div>
-
-                <!-- Form 2: Repor Estoque -->
-                <div class="form-card">
-                    <h3>Acrescentar Estoque</h3>
-                    <form action="/repor-estoque" method="POST">
-                        <input type="text" name="codigo" placeholder="Código do Produto" required>
-                        <input type="number" name="quantidade" placeholder="Quantidade a Adicionar" required>
-                        <button type="submit" class="btn-primary">Adicionar ao Estoque</button>
-                    </form>
-                </div>
-            </div>
-
-            <h3 class="section-title">Produtos Cadastrados</h3>
-            <div class="products-grid">
-                {% if produtos %}
-                    {% for produto in produtos %}
-                        <div class="product-card">
-                            <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome }}">
-                            <h4>{{ produto.nome }}</h4>
-                            <p><strong>Código:</strong> {{ produto.codigo }}</p>
-                            <p><strong>Qtd:</strong> {{ produto.quantidade }}</p>
-                            <p><strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}</p>
-                            <div class="product-card-actions">
-                                <button onclick="editarPreco('{{ produto.codigo }}')" class="btn-sm">Editar Preço</button>
-                                <button class="btn-sm btn-danger">Remover</button>
+                            <div class="camera-container">
+                                <video id="video-preview" style="display: none;" autoplay playsinline></video>
+                                <img id="photo-preview" src="{{ url_for('static', filename='img/logo.png') }}" alt="Preview da Foto">
+                                <input type="hidden" name="foto_base64" id="foto_base64">
+                                
+                                <button type="button" id="btn-camera" class="btn-secondary" onclick="iniciarCamera()">Tirar Foto do Produto</button>
+                                <button type="button" id="btn-capturar" class="btn-primary" style="display: none;" onclick="capturarFoto()">Capturar Foto</button>
                             </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <p style="color: #888;">Nenhum produto cadastrado ainda.</p>
-                {% endif %}
+
+                            <button type="submit" class="btn-primary">Salvar Produto</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="produtos-col-direita">
+                    <h3 class="section-title">Produtos Cadastrados</h3>
+
+                    <div class="products-grid">
+                        {% if produtos %}
+                            {% for produto in produtos %}
+                                <div class="product-card">
+                                    <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome }}">
+                                    <h4>{{ produto.nome }}</h4>
+                                    <p><strong>Código:</strong> {{ produto.codigo }}</p>
+                                    <p><strong>Qtd:</strong> {{ produto.quantidade }}</p>
+                                    <p><strong>Preço:</strong> R$ {{ "%.2f"|format(produto.preco) }}</p>
+                                    <div class="product-card-actions">
+                                        <button onclick="editarPreco('{{ produto.codigo }}')" class="btn-sm">Editar Preço</button>
+                                        <button class="btn-sm btn-danger">Remover</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: #888;">Nenhum produto cadastrado ainda.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
         </section>
 
-        <!-- ABA 3: GERENCIAR VENDAS -->
         <section id="tab-vendas" class="tab-content">
             <div class="forms-container-center">
                 <div class="form-card">
@@ -169,7 +197,6 @@
             </div>
         </section>
 
-        <!-- ABA 4: GERENCIAR CONTAS E COMPRAS -->
         <section id="tab-contas" class="tab-content">
             <div class="forms-container-center">
                 <div class="form-card">
@@ -198,7 +225,6 @@
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-        // Troca de Abas
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab-content");
@@ -213,7 +239,6 @@
             evt.currentTarget.classList.add("active");
         }
 
-        // Gráfico do Dia Atual
         const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
         const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
 
@@ -247,7 +272,6 @@
             }
         });
 
-        // Captura da Câmera
         let streamCam = null;
 
         async function iniciarCamera() {

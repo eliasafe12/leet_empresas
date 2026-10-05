@@ -1,4 +1,4 @@
-// Função para editar o preço do produto via modal/prompt
+// Função para editar o preço do produto
 function editarPreco(codigoProduto) {
     const novoPreco = prompt(`Introduza o novo preço para o produto (${codigoProduto}):`);
     
@@ -10,7 +10,7 @@ function editarPreco(codigoProduto) {
             return;
         }
 
-        // Envio do formulário dinâmico para a rota de edição de preço
+        // Envio do formulário para a rota de edição de preço
         fetch('/editar-preco', {
             method: 'POST',
             headers: {
