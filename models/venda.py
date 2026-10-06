@@ -2,15 +2,17 @@ from .movimentacao import Movimentacao
 
 
 class Venda(Movimentacao):
-    def __init__(self, codigo, preco, quantidade):
-        super().__init__(codigo, preco, quantidade)
+    def __init__(self, produtos):
+        super().__init__(produtos) 
 
     def calcularPrecoFinal(self):
-        preco_final = self.preco * self.quantidade
+        preco_final = 0
+        for i in self.produtos:
+            preco_final += i[1] * i[2]
         return preco_final
 
     def getInformacoes(self):
-        return self.codigo, self.preco, self.quantidade, self.preco_final, self.data
+        return self.produtos, self.preco_final, self.data
 
     def __str__(self):
         return f'''Venda realizada em {self.data}

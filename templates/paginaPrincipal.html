@@ -297,8 +297,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Código / Produto</th>
-                            <th>Quantidade</th>
+                            <th>Código da Venda</th>
                             <th>Valor Total</th>
                             <th>Data</th>
                         </tr>
@@ -306,10 +305,9 @@
                     <tbody>
                         {% for venda in vendas %}
                             <tr>
-                                <td>{{ venda.codigo }}</td>
-                                <td>{{ venda.quantidade }}</td>
-                                <td>R$ {{ "%.2f"|format(venda.valor_total) }}</td>
-                                <td>{{ venda.data | default('-') }}</td>
+                                <td>{{ venda["id_venda"] }}</td>
+                                <td>R$ {{ "%.2f"|format(venda["preco_total"]) }}</td>
+                                <td>{{ venda["data_venda"] | default('-') }}</td>
                             </tr>
                         {% else %}
                             <tr>
@@ -434,17 +432,35 @@
                 <div class="col-esquerda">
                     <div class="form-card">
                         <h3>Registrar Nova Venda</h3>
-                        <form action="/registrar-venda" method="POST">
-                            <label>Código do Produto:</label>
-                            <input type="text" name="codigo" placeholder="Código" required>
-                            
-                            <label>Quantidade Vendida:</label>
-                            <input type="number" name="quantidade" placeholder="Quantidade" required>
-                            
-                            <button type="submit" class="btn-primary">Concluir Venda</button>
-                        </form>
-                    </div>
-                </div>
+
+                        <!-- Escolher quantidade de produtos -->
+                        <label>Quantidade de produtos:</label>
+                        <input 
+                            type="number" 
+                            id="numero-produtos" 
+                            min="1" 
+                            value="1"
+                        >
+
+                        <button 
+                            type="button" 
+                            class="btn-primary"
+                            onclick="criarCamposVenda()"
+                        >
+                        Adicionar produtos
+                </button>
+
+                <form action="/registrar-venda" method="POST">
+                    
+                    <div id="produtos-venda"></div>
+
+                    <button type="submit" class="btn-primary">
+                        Concluir Venda
+                    </button>
+
+                </form>
+            </div>
+        </div>
 
                 <div class="col-direita">
                     <h3 class="section-title">Histórico de Vendas</h3>
@@ -452,8 +468,7 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Código / Produto</th>
-                                    <th>Quantidade</th>
+                                    <th>Código da Venda</th>
                                     <th>Valor Total</th>
                                     <th>Data</th>
                                 </tr>
@@ -461,10 +476,9 @@
                             <tbody>
                                 {% for venda in vendas %}
                                     <tr>
-                                        <td>{{ venda.codigo or venda.produto_nome }}</td>
-                                        <td>{{ venda.quantidade }}</td>
-                                        <td>R$ {{ "%.2f"|format(venda.valor_total | default(0)) }}</td>
-                                        <td>{{ venda.data | default('-') }}</td>
+                                        <td>{{ venda["id_venda"] }}</td>
+                                        <td>R$ {{ "%.2f"|format(venda["preco_total"] | default(0)) }}</td>
+                                        <td>{{ venda["data_venda"] | default('-') }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -689,6 +703,40 @@
             document.getElementById('btn-capturar').style.display = 'none';
             document.getElementById('btn-camera').style.display = 'block';
             document.getElementById('btn-camera').innerText = 'Tirar Outra Foto';
+        }
+        function criarCamposVenda() {
+            const numero = parseInt(
+                document.getElementById("numero-produtos").value
+            );
+
+            const container = document.getElementById("produtos-venda");
+
+            container.innerHTML = "";
+
+            for (let i = 0; i < numero; i++) {
+                container.innerHTML += `
+                    <div class="produto-venda">
+                        <h4>Produto ${i + 1}</h4>
+
+                        <label>Código do Produto:</label>
+                        <input 
+                            type="text" 
+                            name="codigo[]" 
+                            placeholder="Código"
+                            required
+                        >
+
+                        <label>Quantidade Vendida:</label>
+                        <input 
+                            type="number" 
+                            name="quantidade[]" 
+                            placeholder="Quantidade"
+                            min="1"
+                            required
+                        >
+                    </div>
+                `;
+            }
         }
     </script>
 </body>

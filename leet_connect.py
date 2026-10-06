@@ -51,13 +51,17 @@ def inicializar_banco():
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Compra (
-            id_compra INTEGER PRIMARY KEY AUTOINCREMENT
+            id_compra INTEGER PRIMARY KEY AUTOINCREMENT,
+            data_compra TEXT NOT NULL,
+            preco_total REAL NOT NULL
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Venda (
-            id_venda INTEGER PRIMARY KEY AUTOINCREMENT
+            id_venda INTEGER PRIMARY KEY AUTOINCREMENT,
+            data_venda TEXT NOT NULL,
+            preco_total REAL NOT NULL
         )
     """)
 
@@ -73,6 +77,7 @@ def inicializar_banco():
         CREATE TABLE IF NOT EXISTS ProdutoVendido (
             produto_id INTEGER,
             venda_id INTEGER,
+            quantidade_vendida INTEGER NOT NULL,
             PRIMARY KEY (produto_id, venda_id),
             FOREIGN KEY (produto_id) REFERENCES Produto(id_prod),
             FOREIGN KEY (venda_id) REFERENCES Venda(id_venda)
@@ -83,6 +88,7 @@ def inicializar_banco():
         CREATE TABLE IF NOT EXISTS ProdutoComprado (
             produto_id INTEGER,
             compra_id INTEGER,
+            quantidade_comprada INTEGER NOT NULL,
             PRIMARY KEY (produto_id, compra_id),
             FOREIGN KEY (produto_id) REFERENCES Produto(id_prod),
             FOREIGN KEY (compra_id) REFERENCES Compra(id_compra)

@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, a
 from leet_connect import conectar, inicializar_banco
 from CRUD import *
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from datetime import date
 app = Flask(__name__)
 
 app.secret_key = "troque-essa-chave" # temporário
@@ -63,16 +63,23 @@ def dashboard():
     
     produtos = selectProdutos()
     contas = selectContas()
+    vendas = selectVendas()
+    total_vendas_hoje = 0
+    for i in vendas:
+        if i["data_venda"][:10] == date.today().strftime("%d/%m/%Y"):
+            total_vendas_hoje += i["preco_total"]
+
     return render_template(
         "paginaPrincipal.html",
         nome_empresa=session.get("empresa"),
         nome_usuario=session.get("usuario"),
-        total_produtos=0,
+        total_produtos=len(produtos),
         saldo_dia=0,
-        total_vendas_hoje=0,
+        total_vendas_hoje=total_vendas_hoje,
         total_compras_hoje=0,
         produtos=produtos,
         contas=contas,
+        vendas=vendas,
         notificacoes=[]
     )
 
@@ -88,20 +95,24 @@ def cadastrar_produto():
 
 @app.route('/registrar-venda', methods=['POST'])
 def registrar_venda(): # ainda não está funcionando kkk
-    codigo = request.form.get('codigo')
-    quantidade = request.form.get('quantidade')
-    produto = buscarProduto(codigo)
-    if not produto:
-        return "Produto não encontrado", 404
-    if int(quantidade) > produto["quant_prod"]:
-        return "Quantidade insuficiente em estoque", 400
-    cadastrar_venda = Venda(produto["id_prod"], produto["valor_venda"], int(quantidade))
-    insertVenda(*cadastrar_venda.getInformacoes())
+    codigos = request.form.getlist("codigo[]")
+    quantidades = request.form.getlist("quantidade[]")
+    cadastrar_venda = []
+    for codigo, quantidade in zip(codigos, quantidades):
+        produto = buscarProduto(codigo)
+        if not produto:
+            return "Produto não encontrado", 404
+        if int(quantidade) > produto["quant_prod"]:
+            return "Quantidade insuficiente em estoque", 400
+        cadastrar_venda.append((produto["id_prod"], produto["valor_venda"], int(quantidade)))
+    
+    venda_final = Venda(cadastrar_venda)
+    insertVenda(venda_final)
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-compra', methods=['POST'])
 def registrar_compra():
-    # Adicione aqui a lógica para registrar compras
+    
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-conta', methods=['POST'])

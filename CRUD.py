@@ -40,12 +40,28 @@ def buscarProduto(id_prod):
     connector.close()
     cursor.close()
 
-def insertVenda(codigo, preco, quantidade, preco_final, data):
+def insertVenda(venda):
     connector = conectar()
     cursor = connector.cursor()
-    cursor.execute("insert into Venda (codigo_prod, preco_unitario, quant_venda, preco_final, data_venda) Values (?, ?, ?, ?, ?)",(codigo, preco, quantidade, preco_final, data))
+    produtos = venda.produtos
+    preco_total = venda.preco_final
+    data = venda.data
+    cursor.execute("INSERT INTO Venda (data_venda, preco_total) VALUES (?, ?)", (data, preco_total))
+    venda_id = cursor.lastrowid
+    for produto in produtos:
+        produto_id = produto[0]
+        quantidade = produto[2]
+        cursor.execute("INSERT INTO ProdutoVendido (produto_id, venda_id, quantidade_vendida) VALUES (?, ?, ?)", (produto_id,venda_id,quantidade))
     connector.commit()
     connector.close()
+
+def selectVendas():
+    connector = conectar()
+    cursor = connector.cursor()
+    cursor.execute("SELECT * FROM Venda")
+    return cursor.fetchall()
+    connector.close()
+    cursor.close()
 
 def deleteProduto(id_prod):
     connector = conectar()
