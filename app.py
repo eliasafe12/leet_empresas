@@ -12,7 +12,7 @@ from flask_wtf.csrf import CSRFProtect
 import base64
 import binascii
 import io
-from datetime import date
+from datetime import date, datetime
 import os
 from dotenv import load_dotenv
 import math
@@ -272,6 +272,9 @@ def registrar_venda():
         if not math.isfinite(float(quantidade)):
             flash("Quantidade inválida", "error")
             return redirect(url_for('dashboard'))
+        if quantidade > produto["quant_prod"]:
+            flash(f"Quantidade insuficiente em estoque para o produto {produto['nome_prod']}", "error")
+            return redirect(url_for('dashboard'))
             
         cadastrar_venda.append((produto["id_prod"], produto["valor_venda"], int(quantidade)))
     insertVenda(Venda(cadastrar_venda))
@@ -289,9 +292,12 @@ def registrar_compra():
     for codigo, quantidade in itens.items():
         produto = buscarProduto(codigo)
         if not produto:
-            return "Produto não encontrado", 404
+            flash("Produto não encontrado", "error")
+            return redirect(url_for('dashboard'))
         if not math.isfinite(float(quantidade)):
-            return "Quantidade inválida", 400
+            flash("Quantidade inválida", "error")
+            return redirect(url_for('dashboard'))
+        
         cadastrar_compra.append((produto["id_prod"], produto["valor_custo"], int(quantidade)))
     insertCompra(Compra(cadastrar_compra))
     return redirect(url_for('dashboard'))
@@ -308,7 +314,8 @@ def registrar_conta():
     except ValueError as e:
         return str(e), 400
     if not math.isfinite(float(valor)):
-        return "Valor inválido", 400
+        flash("Valor inválido", "error")
+        return redirect(url_for('dashboard'))
     cadastrar_conta = Conta(descricao, float(valor), vencimento)
     insertConta(*cadastrar_conta.getInformacoes())
     return redirect(url_for('dashboard'))
@@ -320,4 +327,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1",port=5000,debug=False)
+    app.run(host="127.0.0.1",port=5000,debug=True)

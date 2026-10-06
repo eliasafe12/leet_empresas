@@ -67,10 +67,8 @@ def insertVenda(venda):
         for produto in venda.produtos:
             produto_id = produto[0]
             quantidade = produto[2]
+            cursor.execute("UPDATE Produto SET quant_prod = quant_prod - ? WHERE id_prod = ? AND ativo = 1", (quantidade, produto_id))
             cursor.execute("INSERT INTO ProdutoVendido (produto_id, venda_id, quantidade_vendida) VALUES (?, ?, ?)", (produto_id,venda_id,quantidade))
-            cursor.execute("UPDATE Produto SET quant_prod = quant_prod - ? WHERE id_prod = ? AND quant_prod >= ? AND ativo = 1", (quantidade, produto_id, quantidade))
-            if cursor.rowcount != 1:
-                raise ValueError(f"Quantidade insuficiente em estoque para o produto com ID {produto_id}")
     connector.commit()
     connector.close()
 
@@ -112,11 +110,11 @@ def deleteItem(id_prod, tipo_item):
         if tipo_item == "produto":
             cursor.execute("UPDATE Produto SET ativo = 0 WHERE id_prod = ?", (id_prod,))
         elif tipo_item == "venda":
-            cursor.execute("DELETE FROM Venda WHERE id_venda = ?", (id_prod,))
             cursor.execute("UPDATE Produto SET quant_prod = quant_prod + (SELECT quantidade_vendida FROM ProdutoVendido WHERE venda_id = ?) WHERE id_prod = (SELECT produto_id FROM ProdutoVendido WHERE venda_id = ?)", (id_prod, id_prod))
+            cursor.execute("DELETE FROM Venda WHERE id_venda = ?", (id_prod,))   
         elif tipo_item == "compra":
-            cursor.execute("DELETE FROM Compra WHERE id_compra = ?", (id_prod,))
             cursor.execute("UPDATE Produto SET quant_prod = quant_prod - (SELECT quantidade_comprada FROM ProdutoComprado WHERE compra_id = ?) WHERE id_prod = (SELECT produto_id FROM ProdutoComprado WHERE compra_id = ?)", (id_prod, id_prod))
+            cursor.execute("DELETE FROM Compra WHERE id_compra = ?", (id_prod,))            
         elif tipo_item == "conta":
             cursor.execute("DELETE FROM Conta WHERE id_conta = ?", (id_prod,))
         else:
