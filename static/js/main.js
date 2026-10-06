@@ -1,8 +1,15 @@
 // Função para editar o preço do produto
 function editarPreco(codigoProduto) {
     const tipoPreco = prompt('Introduza qual o tipo de preço (Custo/Venda):');
+    if (tipoPreco === null) return;
+    const tipo = tipoPreco.trim().toLowerCase();
+    if (tipo !== 'custo' && tipo !== 'venda') {
+        alert("Digite 'Custo' ou 'Venda'.");
+        return;
+    }
+
     const novoPreco = prompt(`Introduza o novo preço para o produto (${codigoProduto}):`);
-    
+ 
     if (novoPreco !== null && novoPreco.trim() !== "") {
         const valorFormatado = parseFloat(novoPreco.replace(',', '.'));
         
@@ -20,7 +27,7 @@ function editarPreco(codigoProduto) {
             body: JSON.stringify({
                 codigo: codigoProduto,
                 novo_preco: valorFormatado,
-                tipo_preco: tipoPreco.toLowerCase() // Envia o tipo de preço em minúsculas
+                tipo_preco: tipo // Envia o tipo de preço em minúsculas
             })
         })
         .then(response => {
@@ -28,6 +35,32 @@ function editarPreco(codigoProduto) {
                 window.location.reload();
             } else {
                 alert("Erro ao atualizar o preço do produto.");
+            }
+        })
+        .catch(error => {
+            console.error("Erro:", error);
+            alert("Falha na comunicação com o servidor.");
+        });
+    }
+}
+function removerItem(codigoItem, tipo) {
+    if (confirm(`Tem certeza que deseja remover o item com código ${codigoItem}?`)) {
+        // Envio do formulário para a rota de remoção de item
+        fetch('/remover-item', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                codigo: codigoItem,
+                tipo: tipo // Envia o tipo de item (produto, venda, compra, conta)
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert("Erro ao remover o produto.");
             }
         })
         .catch(error => {
@@ -96,38 +129,6 @@ function openTab(evt, tabName) {
     evt.currentTarget.classList.add("active");
 }
 
-const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
-const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
-
-const ctx = document.getElementById('chartComprasVendas').getContext('2d');
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ['Hoje'],
-        datasets: [
-            {
-                label: 'Vendas (R$)',
-                data: [totalVendas],
-                backgroundColor: '#22c55e'
-            },
-            {
-                label: 'Compras (R$)',
-                data: [totalCompras],
-                backgroundColor: '#ef4444'
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { labels: { color: '#ffffff' } }
-        },
-        scales: {
-            x: { ticks: { color: '#ffffff' } },
-            y: { ticks: { color: '#ffffff' }, beginAtZero: true }
-        }
-    }
-});
 
 let streamCam = null;
 
@@ -172,7 +173,7 @@ function capturarFoto() {
 }
 function criarCamposVenda() {
     const numero = parseInt(
-        document.getElementById("numero-produtos").value
+        document.getElementById("numero-produtos-venda").value
     );
 
     const container = document.getElementById("produtos-venda");
@@ -181,7 +182,7 @@ function criarCamposVenda() {
 
     for (let i = 0; i < numero; i++) {
         container.innerHTML += `
-            <div class="produto-venda">
+            <div class="movimentacao">
                 <h4>Produto ${i + 1}</h4>
 
                 <label>Código do Produto:</label>
@@ -206,7 +207,7 @@ function criarCamposVenda() {
 }
 function criarCamposCompra() {
     const numero = parseInt(
-        document.getElementById("numero-produtos").value
+        document.getElementById("numero-produtos-compra").value
     );
 
     const container = document.getElementById("produtos-compra");
@@ -215,7 +216,7 @@ function criarCamposCompra() {
 
     for (let i = 0; i < numero; i++) {
         container.innerHTML += `
-            <div class="produto-compra">
+            <div class="movimentacao">
                 <h4>Produto ${i + 1}</h4>
 
                 <label>Código do Produto:</label>

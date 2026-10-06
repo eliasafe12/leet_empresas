@@ -1,2 +1,3 @@
 .venv/
 leet.db
+.env

@@ -164,7 +164,7 @@
                         <h3>Cadastrar Novo Produto</h3>
                         <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
                             <input type="text" name="nome" placeholder="Nome do Produto" required>
-                            <input type="text" name="valor_custo" placeholder="Preço de Custo (R$)" required>
+                            <input type="number" step="0.01" name="valor_custo" placeholder="Preço de Custo (R$)" required>
                             <input type="number" step="0.01" name="valor_venda" placeholder="Preço de Venda (R$)" required>
                             <input type="number" name="quantidade" placeholder="Quantidade Inicial" required>
                             
@@ -198,8 +198,8 @@
                                         <p><strong>Preço Custo:</strong> R$ {{ "%.2f"|format(produto['valor_custo']) }}</p>
                                     {% endif %}
                                     <div class="product-card-actions">
-                                        <button onclick="editarPreco()" class="btn-sm">Editar Preço</button>
-                                        <button class="btn-sm btn-danger">Remover</button>
+                                        <button onclick="editarPreco('{{ produto['id_prod'] }}')" class="btn-sm">Editar Preço</button>
+                                        <button onclick="removerItem('{{ produto['id_prod'] }}', 'produto')" class="btn-sm btn-danger">Remover</button>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -221,7 +221,7 @@
                         <label>Quantidade de produtos:</label>
                         <input 
                             type="number" 
-                            id="numero-produtos" 
+                            id="numero-produtos-venda" 
                             min="1" 
                             value="1"
                         >
@@ -255,6 +255,7 @@
                                     <th>Código da Venda</th>
                                     <th>Valor Total</th>
                                     <th>Data</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -263,6 +264,9 @@
                                         <td>{{ venda["id_venda"] }}</td>
                                         <td>R$ {{ "%.2f"|format(venda["preco_total"] | default(0)) }}</td>
                                         <td>{{ venda["data_venda"] | default('-') }}</td>
+                                        <td>
+                                            <button onclick="removerItem('{{ venda['id_venda'] }}', 'venda')" class="btn-sm btn-danger">Remover</button>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -283,7 +287,7 @@
                         <label>Quantidade de produtos:</label>
                         <input 
                             type="number" 
-                            id="numero-produtos" 
+                            id="numero-produtos-compra" 
                             min="1" 
                             value="1"
                         >
@@ -322,9 +326,10 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Código do Produto</th>
-                                    <th>Quantidade</th>
+                                    <th>Código da Compra</th>
+                                    <th>Valor Total</th>
                                     <th>Data</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -333,6 +338,9 @@
                                         <td>{{ compra["id_compra"] }}</td>
                                         <td>R$ {{ "%.2f"|format(compra["preco_total"]) }}</td>
                                         <td>{{ compra["data_compra"] | default('-') }}</td>
+                                        <td>
+                                            <button onclick="removerItem('{{ compra['id_compra'] }}', 'compra')" class="btn-sm btn-danger">Remover</button>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -349,6 +357,7 @@
                                     <th>Descrição</th>
                                     <th>Valor</th>
                                     <th>Vencimento</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -357,6 +366,9 @@
                                         <td>{{ conta["descricao_conta"] }}</td>
                                         <td>R$ {{ "%.2f"|format(conta["valor_conta"]) }}</td>
                                         <td>{{ conta["vencimento"] }}</td>
+                                        <td>
+                                            <button onclick="removerItem('{{ conta['id_conta'] }}', 'conta')" class="btn-sm btn-danger">Remover</button>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -371,5 +383,40 @@
     </main>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
+        const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
+
+        const ctx = document.getElementById('chartComprasVendas').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Hoje'],
+                datasets: [
+                    {
+                        label: 'Vendas (R$)',
+                        data: [totalVendas],
+                        backgroundColor: '#22c55e'
+                    },
+                    {
+                        label: 'Compras (R$)',
+                        data: [totalCompras],
+                        backgroundColor: '#ef4444'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#ffffff' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#ffffff' } },
+                    y: { ticks: { color: '#ffffff' }, beginAtZero: true }
+                }
+            }
+        });
+
+    </script>
 </body>
 </html>

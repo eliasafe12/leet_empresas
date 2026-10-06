@@ -36,7 +36,8 @@ def inicializar_banco():
             nome_prod TEXT NOT NULL,
             valor_custo REAL NOT NULL,
             valor_venda REAL NOT NULL,
-            quant_prod INTEGER NOT NULL
+            quant_prod INTEGER NOT NULL,
+            ativo INTEGER NOT NULL DEFAULT 1
         )
     """)
 
@@ -80,7 +81,7 @@ def inicializar_banco():
             quantidade_vendida INTEGER NOT NULL,
             PRIMARY KEY (produto_id, venda_id),
             FOREIGN KEY (produto_id) REFERENCES Produto(id_prod),
-            FOREIGN KEY (venda_id) REFERENCES Venda(id_venda)
+            FOREIGN KEY (venda_id) REFERENCES Venda(id_venda) ON DELETE CASCADE
         )
     """)
 
@@ -91,7 +92,7 @@ def inicializar_banco():
             quantidade_comprada INTEGER NOT NULL,
             PRIMARY KEY (produto_id, compra_id),
             FOREIGN KEY (produto_id) REFERENCES Produto(id_prod),
-            FOREIGN KEY (compra_id) REFERENCES Compra(id_compra)
+            FOREIGN KEY (compra_id) REFERENCES Compra(id_compra) ON DELETE CASCADE
         )
     """)
 

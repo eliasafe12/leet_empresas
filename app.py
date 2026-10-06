@@ -9,12 +9,35 @@ from leet_connect import conectar, inicializar_banco
 from CRUD import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 app = Flask(__name__)
 
-app.secret_key = "troque-essa-chave" # temporário
+app.secret_key = os.getenv("SECRET_KEY")
 inicializar_banco()
 
-usuarios = []
+
+def ler_itens(form):
+    codigos = form.getlist("codigo[]")
+    quantidades = form.getlist("quantidade[]")
+    if not codigos or len(codigos) != len(quantidades):
+        raise ValueError("Adicione pelo menos um produto")
+
+    itens = {}
+    for codigo, qtd in zip(codigos, quantidades):
+        try:
+            codigo = int(codigo)
+            qtd = int(qtd)
+        except ValueError:
+            raise ValueError("Código e quantidade devem ser números inteiros")
+        if qtd <= 0:
+            raise ValueError("A quantidade deve ser maior que zero")
+        itens[codigo] = itens.get(codigo, 0) + qtd   # soma repetidos
+    return itens
+
 @app.route("/")
 def home():
     # Redireciona a rota inicial para a tela de login
@@ -47,9 +70,9 @@ def cadastro():
         senha = request.form.get('senha')
         if not user_id or not nome_empresa or not senha:
             return "Preencha todos os campos", 400
-        usuario = selectUsuario(user_id)
-        if usuario:
-            return "Usuário já existe", 400
+        #usuario = selectUsuario(user_id)
+        #if usuario:
+            #return "Usuário já existe", 400
         cadastrar_usuario = User(user_id, nome_empresa, senha)
         insertUsuario(*cadastrar_usuario.getInformacoes())
         return redirect(url_for('login'))
@@ -65,6 +88,7 @@ def dashboard():
     contas = selectContas()
     vendas = selectVendas()
     compras = selectCompras()
+    notificacoes = []
     total_vendas_hoje = 0
     for i in vendas:
         if i["data_venda"][:10] == date.today().strftime("%d/%m/%Y"):
@@ -78,6 +102,16 @@ def dashboard():
         total_contas += i["valor_conta"]
     saldo_diario = SaldoDiario(total_vendas_hoje, total_compras_hoje, total_contas)
 
+    for i in produtos:
+        objeto_produto = Produto(i["nome_prod"], i["valor_custo"], i["valor_venda"], i["quant_prod"])
+        aviso = objeto_produto.avisarFalta()
+        if aviso:
+            notificacoes.append(aviso)
+    for i in contas:
+        objeto_conta = Conta(i["descricao_conta"], i["valor_conta"], i["vencimento"])
+        aviso = objeto_conta.avisarVencimento()
+        if aviso:
+            notificacoes.append(aviso)
     return render_template(
         "paginaPrincipal.html",
         nome_empresa=session.get("empresa"),
@@ -90,64 +124,105 @@ def dashboard():
         contas=contas,
         vendas=vendas,
         compras=compras,
-        notificacoes=[]
+        notificacoes=notificacoes
     )
 
 @app.route('/cadastrar-produto', methods=['POST'])
 def cadastrar_produto():
-    nome = request.form.get('nome')
-    valor_custo = request.form.get('valor_custo')
-    valor_venda = request.form.get('valor_venda')
-    quant = request.form.get('quantidade')
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    try:
+        nome = request.form.get('nome', '').strip()
+        valor_custo = float(request.form.get('valor_custo').replace(',', '.'))
+        valor_venda = float(request.form.get('valor_venda').replace(',', '.'))
+        quant = int(request.form.get('quantidade'))
+    except (TypeError, ValueError):
+        return "Preencha os valores corretamente", 400
+    if not nome or valor_custo < 0 or valor_venda < 0 or quant < 0:
+        return "Valores não podem ser negativos", 400
     cadastrar_produto = Produto(nome, float(valor_custo), float(valor_venda), int(quant))
     insertProduto(*cadastrar_produto.getInformacoes())
     return redirect(url_for('dashboard'))
 
 @app.route('/editar-preco', methods=['POST'])
 def editar_preco():
-    codigo = request.get_json('codigo')
-    novo_preco = request.get_json('novo_preco')
-    tipo_preco = request.get_json('tipo_preco')
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    dados = request.get_json(silent=True)
+    if not dados:
+        return {"erro": "JSON inválido"}, 400
+    codigo = dados.get('codigo')
+    tipo_preco = dados.get('tipo_preco')
+    try:
+        novo_preco = float(dados.get("novo_preco"))
+    except (TypeError, ValueError):
+        return {"erro": "preço inválido"}, 400
+    if novo_preco < 0:
+        return {"erro": "preço inválido"}, 400
+    if not buscarProduto(codigo):
+        return {"erro": "produto não encontrado"}, 404
     if tipo_preco == "custo":
-        updatePrecoCusto(codigo, float(novo_preco))
+        updatePrecoCusto(codigo, novo_preco)
     elif tipo_preco == "venda":
-        updatePrecoVenda(codigo, float(novo_preco))
+        updatePrecoVenda(codigo, novo_preco)
+    else:
+        return {"erro": "tipo deve ser 'custo' ou 'venda'"}, 400
+
+    return redirect(url_for('dashboard'))
+
+@app.route('/remover-item', methods=['POST'])
+def remover_item():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    dados = request.get_json(silent=True)
+    if not dados:
+        return {"erro": "JSON inválido"}, 400
+    codigo = dados.get('codigo')
+    tipo_item = dados.get('tipo')
+    deleteItem(codigo, tipo_item)
+    
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-venda', methods=['POST'])
 def registrar_venda():
-    codigos = request.form.getlist("codigo[]")
-    quantidades = request.form.getlist("quantidade[]")
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    try:
+        itens = ler_itens(request.form)
+    except ValueError as e:
+        return str(e), 400
     cadastrar_venda = []
-    for codigo, quantidade in zip(codigos, quantidades):
+    for codigo, quantidade in itens.items():
         produto = buscarProduto(codigo)
         if not produto:
             return "Produto não encontrado", 404
         if int(quantidade) > produto["quant_prod"]:
             return "Quantidade insuficiente em estoque", 400
         cadastrar_venda.append((produto["id_prod"], produto["valor_venda"], int(quantidade)))
-        updateEstoque(codigo, int(quantidade), "Venda")  # Atualiza o estoque após a venda
-    venda_final = Venda(cadastrar_venda)
-    insertVenda(venda_final)
+    insertVenda(Venda(cadastrar_venda))
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-compra', methods=['POST'])
 def registrar_compra():
-    codigos = request.form.getlist("codigo[]")
-    quantidades = request.form.getlist("quantidade[]")
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    try:
+        itens = ler_itens(request.form)
+    except ValueError as e:
+        return str(e), 400
     cadastrar_compra = []
-    for codigo, quantidade in zip(codigos, quantidades):
+    for codigo, quantidade in itens.items():
         produto = buscarProduto(codigo)
         if not produto:
             return "Produto não encontrado", 404
         cadastrar_compra.append((produto["id_prod"], produto["valor_custo"], int(quantidade)))
-        updateEstoque(codigo, int(quantidade), "Compra")  # Atualiza o estoque após a compra
-    compra_final = Compra(cadastrar_compra)
-    insertCompra(compra_final)
+    insertCompra(Compra(cadastrar_compra))
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-conta', methods=['POST'])
 def registrar_conta():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
     descricao = request.form.get('descricao')
     valor = request.form.get('valor')
     vencimento = request.form.get('vencimento')

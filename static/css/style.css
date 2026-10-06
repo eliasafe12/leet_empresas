@@ -963,6 +963,12 @@ hr {
     flex-direction: column;
     gap: 1rem;
 }
+.movimentacao{
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
 .section-title {
     margin: 0;
     font-size: 1.3rem;
