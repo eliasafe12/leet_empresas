@@ -6,221 +6,6 @@
     <title>LeetEmpresas - Página Principal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .forms-container-center {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            width: 100%;
-        }
-        .forms-container-center .form-card {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .camera-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        #video-preview, #photo-preview {
-            width: 100%;
-            max-height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            background-color: #121212;
-            border: 1px solid #3f4248;
-        }
-
-        .produtos-grid-layout, .two-col-layout {
-            display: flex;
-            gap: 2rem;
-            align-items: flex-start;
-            width: 100%;
-        }
-        .produtos-col-esquerda, .col-esquerda {
-            flex: 0 0 420px;
-            max-width: 420px;
-        }
-        .produtos-col-direita, .col-direita {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .section-title {
-            margin: 0;
-            font-size: 1.3rem;
-            color: #ffffff;
-            border-bottom: 1px solid #3f4248;
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.5rem;
-            background-color: #1e1e24;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .data-table th, .data-table td {
-            padding: 0.75rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid #2d2f36;
-            color: #e0e0e0;
-            font-size: 0.9rem;
-        }
-        .data-table th {
-            background-color: #2b2d35;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        .data-table tr:hover {
-            background-color: #262830;
-        }
-
-        .notification-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-right: 15px;
-        }
-
-        .notification-btn {
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            position: relative;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notification-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: #ffffff;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            background-color: #ef4444;
-            color: #ffffff;
-            font-size: 0.75rem;
-            font-weight: bold;
-            border-radius: 50%;
-            padding: 2px 6px;
-            min-width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 4px rgba(0,0,0,0.5);
-        }
-
-        .notification-dropdown {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 40px;
-            width: 320px;
-            background-color: #1e1e24;
-            border: 1px solid #3f4248;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            z-index: 1000;
-            overflow: hidden;
-        }
-
-        .notification-dropdown.active {
-            display: block;
-        }
-
-        .notification-header {
-            background-color: #2b2d35;
-            padding: 0.75rem 1rem;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 0.95rem;
-            border-bottom: 1px solid #3f4248;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-clear-notifications {
-            background: transparent;
-            border: none;
-            color: #22c55e;
-            font-size: 0.75rem;
-            cursor: pointer;
-            text-decoration: underline;
-            padding: 0;
-        }
-
-        .btn-clear-notifications:hover {
-            color: #4ade80;
-        }
-
-        .notification-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .notification-list li {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #2d2f36;
-            color: #e0e0e0;
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .notification-list li:last-child {
-            border-bottom: none;
-        }
-
-        .notification-list li:hover {
-            background-color: #262830;
-        }
-
-        .btn-dismiss-item {
-            background: transparent;
-            border: none;
-            color: #ef4444;
-            font-size: 1rem;
-            cursor: pointer;
-            line-height: 1;
-            padding: 2px 5px;
-        }
-
-        .btn-dismiss-item:hover {
-            color: #f87171;
-        }
-
-        @media (max-width: 900px) {
-            .produtos-grid-layout, .two-col-layout {
-                flex-direction: column;
-            }
-            .produtos-col-esquerda, .col-esquerda {
-                flex: 1;
-                max-width: 100%;
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 <body class="dashboard-body">
 
@@ -332,10 +117,9 @@
                     <tbody>
                         {% for compra in compras %}
                             <tr>
-                                <td>{{ compra.codigo }}</td>
-                                <td>{{ compra.quantidade }}</td>
-                                <td>R$ {{ "%.2f"|format(compra.valor_total) }}</td>
-                                <td>{{ compra.data | default('-') }}</td>
+                                <td>{{ compra["id_compra"] }}</td>
+                                <td>R$ {{ "%.2f"|format(compra["preco_total"]) }}</td>
+                                <td>{{ compra["data_compra"] | default('-') }}</td>
                             </tr>
                         {% else %}
                             <tr>
@@ -405,16 +189,16 @@
                         {% if produtos %}
                             {% for produto in produtos %}
                                 <div class="product-card">
-                                    <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto.nome_prod or produto.nome }}">
-                                    <h4>{{ produto.nome_prod or produto.nome }}</h4>
-                                    <p><strong>Código:</strong> {{ produto.id_prod or produto.codigo }}</p>
-                                    <p><strong>Qtd:</strong> {{ produto.quant_prod or produto.quantidade }}</p>
-                                    <p><strong>Preço Venda:</strong> R$ {{ "%.2f"|format(produto.valor_venda or produto.preco or 0) }}</p>
-                                    {% if produto.valor_custo %}
-                                        <p><strong>Preço Custo:</strong> R$ {{ "%.2f"|format(produto.valor_custo) }}</p>
+                                    <img src="{{ produto.foto_url if produto.foto_url else url_for('static', filename='img/logo.png') }}" alt="{{ produto['nome_prod'] }}">
+                                    <h4>{{ produto['nome_prod'] }}</h4>
+                                    <p><strong>Código:</strong> {{ produto['id_prod'] }}</p>
+                                    <p><strong>Qtd:</strong> {{ produto['quant_prod'] }}</p>
+                                    <p><strong>Preço Venda:</strong> R$ {{ "%.2f"|format(produto['valor_venda'] or 0) }}</p>
+                                    {% if produto['valor_custo'] %}
+                                        <p><strong>Preço Custo:</strong> R$ {{ "%.2f"|format(produto['valor_custo']) }}</p>
                                     {% endif %}
                                     <div class="product-card-actions">
-                                        <button onclick="editarPreco('{{ produto.id_prod or produto.codigo }}')" class="btn-sm">Editar Preço</button>
+                                        <button onclick="editarPreco()" class="btn-sm">Editar Preço</button>
                                         <button class="btn-sm btn-danger">Remover</button>
                                     </div>
                                 </div>
@@ -494,14 +278,32 @@
             <div class="two-col-layout">
                 <div class="col-esquerda">
                     <div class="form-card">
-                        <h3>Registrar Compra de Estoque</h3>
-                        <form action="/registrar-compra" method="POST">
-                            <input type="text" name="codigo" placeholder="Código do Produto" required>
-                            <input type="number" name="quantidade" placeholder="Quantidade Comprada" required>
-                            <button type="submit" class="btn-primary">Registrar Compra</button>
-                        </form>
-                    </div>
+                    <h3>Registrar Compra de Estoque</h3>
+                        <!-- Escolher quantidade de produtos -->
+                        <label>Quantidade de produtos:</label>
+                        <input 
+                            type="number" 
+                            id="numero-produtos" 
+                            min="1" 
+                            value="1"
+                        >
+                        <button 
+                            type="button" 
+                            class="btn-primary"
+                            onclick="criarCamposCompra()"
+                        >
+                        Adicionar produtos
+                </button>
+                <form action="/registrar-compra" method="POST">
+                    
+                    <div id="produtos-compra"></div>
 
+                    <button type="submit" class="btn-primary">
+                        Concluir Compra
+                    </button>
+
+                </form>
+                </div>
                     <div class="form-card" style="margin-top: 1.5rem;">
                         <h3>Outras Contas a Pagar</h3>
                         <form action="/registrar-conta" method="POST">
@@ -528,9 +330,9 @@
                             <tbody>
                                 {% for compra in compras %}
                                     <tr>
-                                        <td>{{ compra.codigo }}</td>
-                                        <td>{{ compra.quantidade }}</td>
-                                        <td>{{ compra.data | default('-') }}</td>
+                                        <td>{{ compra["id_compra"] }}</td>
+                                        <td>R$ {{ "%.2f"|format(compra["preco_total"]) }}</td>
+                                        <td>{{ compra["data_compra"] | default('-') }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -569,175 +371,5 @@
     </main>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>
-        function toggleNotifications(event) {
-            event.stopPropagation();
-            const dropdown = document.getElementById('notificationDropdown');
-            dropdown.classList.toggle('active');
-        }
-
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('notificationDropdown');
-            const wrapper = document.querySelector('.notification-wrapper');
-            if (dropdown && !wrapper.contains(event.target)) {
-                dropdown.classList.remove('active');
-            }
-        });
-
-        function atualizarBadgeNotificacoes() {
-            const list = document.getElementById('notificationList');
-            const items = list.querySelectorAll('li:not(.no-notifications)');
-            const badge = document.getElementById('notificationBadge');
-
-            if (items.length > 0) {
-                if (badge) {
-                    badge.innerText = items.length;
-                    badge.style.display = 'flex';
-                }
-            } else {
-                if (badge) {
-                    badge.style.display = 'none';
-                }
-                list.innerHTML = '<li class="no-notifications" style="justify-content: center; color: #888;">Nenhuma notificação no momento.</li>';
-            }
-        }
-
-        function removerNotificacao(button) {
-            const li = button.closest('li');
-            if (li) {
-                li.remove();
-                atualizarBadgeNotificacoes();
-            }
-        }
-
-        function marcarTodasLidas() {
-            const list = document.getElementById('notificationList');
-            list.innerHTML = '<li class="no-notifications" style="justify-content: center; color: #888;">Nenhuma notificação no momento.</li>';
-            atualizarBadgeNotificacoes();
-        }
-
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove("active");
-            }
-            tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove("active");
-            }
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-
-        const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
-        const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
-
-        const ctx = document.getElementById('chartComprasVendas').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Hoje'],
-                datasets: [
-                    {
-                        label: 'Vendas (R$)',
-                        data: [totalVendas],
-                        backgroundColor: '#22c55e'
-                    },
-                    {
-                        label: 'Compras (R$)',
-                        data: [totalCompras],
-                        backgroundColor: '#ef4444'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { labels: { color: '#ffffff' } }
-                },
-                scales: {
-                    x: { ticks: { color: '#ffffff' } },
-                    y: { ticks: { color: '#ffffff' }, beginAtZero: true }
-                }
-            }
-        });
-
-        let streamCam = null;
-
-        async function iniciarCamera() {
-            try {
-                streamCam = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.getElementById('video-preview');
-                video.srcObject = streamCam;
-                video.style.display = 'block';
-                document.getElementById('photo-preview').style.display = 'none';
-                document.getElementById('btn-camera').style.display = 'none';
-                document.getElementById('btn-capturar').style.display = 'block';
-            } catch (err) {
-                alert('Não foi possível acessar a câmara: ' + err.message);
-            }
-        }
-
-        function capturarFoto() {
-            const video = document.getElementById('video-preview');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 300;
-            canvas.height = video.videoHeight || 200;
-            
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const fotoDataUrl = canvas.toDataURL('image/png');
-            document.getElementById('foto_base64').value = fotoDataUrl;
-            
-            const photoPreview = document.getElementById('photo-preview');
-            photoPreview.src = fotoDataUrl;
-            photoPreview.style.display = 'block';
-            video.style.display = 'none';
-            
-            if (streamCam) {
-                streamCam.getTracks().forEach(track => track.stop());
-            }
-            
-            document.getElementById('btn-capturar').style.display = 'none';
-            document.getElementById('btn-camera').style.display = 'block';
-            document.getElementById('btn-camera').innerText = 'Tirar Outra Foto';
-        }
-        function criarCamposVenda() {
-            const numero = parseInt(
-                document.getElementById("numero-produtos").value
-            );
-
-            const container = document.getElementById("produtos-venda");
-
-            container.innerHTML = "";
-
-            for (let i = 0; i < numero; i++) {
-                container.innerHTML += `
-                    <div class="produto-venda">
-                        <h4>Produto ${i + 1}</h4>
-
-                        <label>Código do Produto:</label>
-                        <input 
-                            type="text" 
-                            name="codigo[]" 
-                            placeholder="Código"
-                            required
-                        >
-
-                        <label>Quantidade Vendida:</label>
-                        <input 
-                            type="number" 
-                            name="quantidade[]" 
-                            placeholder="Quantidade"
-                            min="1"
-                            required
-                        >
-                    </div>
-                `;
-            }
-        }
-    </script>
 </body>
 </html>

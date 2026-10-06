@@ -1,5 +1,6 @@
 // Função para editar o preço do produto
 function editarPreco(codigoProduto) {
+    const tipoPreco = prompt('Introduza qual o tipo de preço (Custo/Venda):');
     const novoPreco = prompt(`Introduza o novo preço para o produto (${codigoProduto}):`);
     
     if (novoPreco !== null && novoPreco.trim() !== "") {
@@ -18,7 +19,8 @@ function editarPreco(codigoProduto) {
             },
             body: JSON.stringify({
                 codigo: codigoProduto,
-                preco: valorFormatado
+                novo_preco: valorFormatado,
+                tipo_preco: tipoPreco.toLowerCase() // Envia o tipo de preço em minúsculas
             })
         })
         .then(response => {
@@ -32,5 +34,207 @@ function editarPreco(codigoProduto) {
             console.error("Erro:", error);
             alert("Falha na comunicação com o servidor.");
         });
+    }
+}
+function toggleNotifications(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('notificationDropdown');
+    dropdown.classList.toggle('active');
+}
+
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('notificationDropdown');
+    const wrapper = document.querySelector('.notification-wrapper');
+    if (dropdown && !wrapper.contains(event.target)) {
+        dropdown.classList.remove('active');
+    }
+});
+
+function atualizarBadgeNotificacoes() {
+    const list = document.getElementById('notificationList');
+    const items = list.querySelectorAll('li:not(.no-notifications)');
+    const badge = document.getElementById('notificationBadge');
+
+    if (items.length > 0) {
+        if (badge) {
+            badge.innerText = items.length;
+            badge.style.display = 'flex';
+        }
+    } else {
+        if (badge) {
+            badge.style.display = 'none';
+        }
+        list.innerHTML = '<li class="no-notifications" style="justify-content: center; color: #888;">Nenhuma notificação no momento.</li>';
+    }
+}
+
+function removerNotificacao(button) {
+    const li = button.closest('li');
+    if (li) {
+        li.remove();
+        atualizarBadgeNotificacoes();
+    }
+}
+
+function marcarTodasLidas() {
+    const list = document.getElementById('notificationList');
+    list.innerHTML = '<li class="no-notifications" style="justify-content: center; color: #888;">Nenhuma notificação no momento.</li>';
+    atualizarBadgeNotificacoes();
+}
+
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+    tablinks = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+    }
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+
+const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
+const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
+
+const ctx = document.getElementById('chartComprasVendas').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Hoje'],
+        datasets: [
+            {
+                label: 'Vendas (R$)',
+                data: [totalVendas],
+                backgroundColor: '#22c55e'
+            },
+            {
+                label: 'Compras (R$)',
+                data: [totalCompras],
+                backgroundColor: '#ef4444'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { labels: { color: '#ffffff' } }
+        },
+        scales: {
+            x: { ticks: { color: '#ffffff' } },
+            y: { ticks: { color: '#ffffff' }, beginAtZero: true }
+        }
+    }
+});
+
+let streamCam = null;
+
+async function iniciarCamera() {
+    try {
+        streamCam = await navigator.mediaDevices.getUserMedia({ video: true });
+        const video = document.getElementById('video-preview');
+        video.srcObject = streamCam;
+        video.style.display = 'block';
+        document.getElementById('photo-preview').style.display = 'none';
+        document.getElementById('btn-camera').style.display = 'none';
+        document.getElementById('btn-capturar').style.display = 'block';
+    } catch (err) {
+        alert('Não foi possível acessar a câmara: ' + err.message);
+    }
+}
+
+function capturarFoto() {
+    const video = document.getElementById('video-preview');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 300;
+    canvas.height = video.videoHeight || 200;
+    
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const fotoDataUrl = canvas.toDataURL('image/png');
+    document.getElementById('foto_base64').value = fotoDataUrl;
+    
+    const photoPreview = document.getElementById('photo-preview');
+    photoPreview.src = fotoDataUrl;
+    photoPreview.style.display = 'block';
+    video.style.display = 'none';
+    
+    if (streamCam) {
+        streamCam.getTracks().forEach(track => track.stop());
+    }
+    
+    document.getElementById('btn-capturar').style.display = 'none';
+    document.getElementById('btn-camera').style.display = 'block';
+    document.getElementById('btn-camera').innerText = 'Tirar Outra Foto';
+}
+function criarCamposVenda() {
+    const numero = parseInt(
+        document.getElementById("numero-produtos").value
+    );
+
+    const container = document.getElementById("produtos-venda");
+
+    container.innerHTML = "";
+
+    for (let i = 0; i < numero; i++) {
+        container.innerHTML += `
+            <div class="produto-venda">
+                <h4>Produto ${i + 1}</h4>
+
+                <label>Código do Produto:</label>
+                <input 
+                    type="text" 
+                    name="codigo[]" 
+                    placeholder="Código"
+                    required
+                >
+
+                <label>Quantidade Vendida:</label>
+                <input 
+                    type="number" 
+                    name="quantidade[]" 
+                    placeholder="Quantidade"
+                    min="1"
+                    required
+                >
+            </div>
+        `;
+    }
+}
+function criarCamposCompra() {
+    const numero = parseInt(
+        document.getElementById("numero-produtos").value
+    );
+
+    const container = document.getElementById("produtos-compra");
+
+    container.innerHTML = "";
+
+    for (let i = 0; i < numero; i++) {
+        container.innerHTML += `
+            <div class="produto-compra">
+                <h4>Produto ${i + 1}</h4>
+
+                <label>Código do Produto:</label>
+                <input 
+                    type="text" 
+                    name="codigo[]" 
+                    placeholder="Código"
+                    required
+                >
+
+                <label>Quantidade Comprada:</label>
+                <input 
+                    type="number" 
+                    name="quantidade[]" 
+                    placeholder="Quantidade"
+                    min="1"
+                    required
+                >
+            </div>
+        `;
     }
 }

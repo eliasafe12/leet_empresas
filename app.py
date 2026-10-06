@@ -64,22 +64,32 @@ def dashboard():
     produtos = selectProdutos()
     contas = selectContas()
     vendas = selectVendas()
+    compras = selectCompras()
     total_vendas_hoje = 0
     for i in vendas:
         if i["data_venda"][:10] == date.today().strftime("%d/%m/%Y"):
             total_vendas_hoje += i["preco_total"]
+    total_compras_hoje = 0
+    for i in compras:
+        if i["data_compra"][:10] == date.today().strftime("%d/%m/%Y"):
+            total_compras_hoje += i["preco_total"]
+    total_contas = 0
+    for i in contas:
+        total_contas += i["valor_conta"]
+    saldo_diario = SaldoDiario(total_vendas_hoje, total_compras_hoje, total_contas)
 
     return render_template(
         "paginaPrincipal.html",
         nome_empresa=session.get("empresa"),
         nome_usuario=session.get("usuario"),
         total_produtos=len(produtos),
-        saldo_dia=0,
+        saldo_dia=saldo_diario.saldo,
         total_vendas_hoje=total_vendas_hoje,
-        total_compras_hoje=0,
+        total_compras_hoje=total_compras_hoje,
         produtos=produtos,
         contas=contas,
         vendas=vendas,
+        compras=compras,
         notificacoes=[]
     )
 
@@ -93,8 +103,19 @@ def cadastrar_produto():
     insertProduto(*cadastrar_produto.getInformacoes())
     return redirect(url_for('dashboard'))
 
+@app.route('/editar-preco', methods=['POST'])
+def editar_preco():
+    codigo = request.get_json('codigo')
+    novo_preco = request.get_json('novo_preco')
+    tipo_preco = request.get_json('tipo_preco')
+    if tipo_preco == "custo":
+        updatePrecoCusto(codigo, float(novo_preco))
+    elif tipo_preco == "venda":
+        updatePrecoVenda(codigo, float(novo_preco))
+    return redirect(url_for('dashboard'))
+
 @app.route('/registrar-venda', methods=['POST'])
-def registrar_venda(): # ainda não está funcionando kkk
+def registrar_venda():
     codigos = request.form.getlist("codigo[]")
     quantidades = request.form.getlist("quantidade[]")
     cadastrar_venda = []
@@ -105,14 +126,24 @@ def registrar_venda(): # ainda não está funcionando kkk
         if int(quantidade) > produto["quant_prod"]:
             return "Quantidade insuficiente em estoque", 400
         cadastrar_venda.append((produto["id_prod"], produto["valor_venda"], int(quantidade)))
-    
+        updateEstoque(codigo, int(quantidade), "Venda")  # Atualiza o estoque após a venda
     venda_final = Venda(cadastrar_venda)
     insertVenda(venda_final)
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-compra', methods=['POST'])
 def registrar_compra():
-    
+    codigos = request.form.getlist("codigo[]")
+    quantidades = request.form.getlist("quantidade[]")
+    cadastrar_compra = []
+    for codigo, quantidade in zip(codigos, quantidades):
+        produto = buscarProduto(codigo)
+        if not produto:
+            return "Produto não encontrado", 404
+        cadastrar_compra.append((produto["id_prod"], produto["valor_custo"], int(quantidade)))
+        updateEstoque(codigo, int(quantidade), "Compra")  # Atualiza o estoque após a compra
+    compra_final = Compra(cadastrar_compra)
+    insertCompra(compra_final)
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-conta', methods=['POST'])
