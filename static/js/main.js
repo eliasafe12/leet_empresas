@@ -23,6 +23,7 @@ function editarPreco(codigoProduto) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({
                 codigo: codigoProduto,
@@ -50,6 +51,7 @@ function removerItem(codigoItem, tipo) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify({
                 codigo: codigoItem,

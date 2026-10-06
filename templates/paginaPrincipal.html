@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LeetEmpresas - Página Principal</title>
@@ -163,6 +164,7 @@
                     <div class="form-card">
                         <h3>Cadastrar Novo Produto</h3>
                         <form action="/cadastrar-produto" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="text" name="nome" placeholder="Nome do Produto" required>
                             <input type="number" step="0.01" name="valor_custo" placeholder="Preço de Custo (R$)" required>
                             <input type="number" step="0.01" name="valor_venda" placeholder="Preço de Venda (R$)" required>
@@ -235,6 +237,7 @@
                 </button>
 
                 <form action="/registrar-venda" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <div id="produtos-venda"></div>
 
@@ -299,6 +302,7 @@
                         Adicionar produtos
                 </button>
                 <form action="/registrar-compra" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <div id="produtos-compra"></div>
 
@@ -311,6 +315,7 @@
                     <div class="form-card" style="margin-top: 1.5rem;">
                         <h3>Outras Contas a Pagar</h3>
                         <form action="/registrar-conta" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="text" name="descricao" placeholder="Qual a conta? (Ex: Luz, Internet)" required>
                             <input type="number" step="0.01" name="valor" placeholder="Qual o valor? (R$)" required>
                             <label style="color: #fff; display: block; margin-top: 0.5rem;">Quando vence?</label>

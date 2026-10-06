@@ -1,9 +1,14 @@
 import sqlite3
+from pathlib import Path
+
+diretorio_atual = Path.home()/".leet_empresas"
+diretorio_atual.mkdir(parents=True, exist_ok=True)
+banco_dados = diretorio_atual/"leet.db"
 
 #arquivo utilizado para a criação das tabelas.
 
 def conectar():
-    connector = sqlite3.connect('leet.db',detect_types=sqlite3.PARSE_DECLTYPES |
+    connector = sqlite3.connect(banco_dados, detect_types=sqlite3.PARSE_DECLTYPES |
                                  sqlite3.PARSE_COLNAMES)
     connector.row_factory = sqlite3.Row
     cursor = connector.cursor()
@@ -37,7 +42,9 @@ def inicializar_banco():
             valor_custo REAL NOT NULL,
             valor_venda REAL NOT NULL,
             quant_prod INTEGER NOT NULL,
-            ativo INTEGER NOT NULL DEFAULT 1
+            ativo INTEGER NOT NULL DEFAULT 1,
+            foto BLOB,
+            foto_mime TEXT
         )
     """)
 
@@ -95,6 +102,13 @@ def inicializar_banco():
             FOREIGN KEY (compra_id) REFERENCES Compra(id_compra) ON DELETE CASCADE
         )
     """)
+
+    # Migração simples para bancos criados por versões anteriores.
+    colunas_produto = {row[1] for row in cursor.execute("PRAGMA table_info(Produto)").fetchall()}
+    if "foto" not in colunas_produto:
+        cursor.execute("ALTER TABLE Produto ADD COLUMN foto BLOB")
+    if "foto_mime" not in colunas_produto:
+        cursor.execute("ALTER TABLE Produto ADD COLUMN foto_mime TEXT")
 
     connector.commit()
     connector.close()

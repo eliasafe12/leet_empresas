@@ -17,23 +17,35 @@ def insertUsuario(user_id, nome_empresa, senha):
         except sqlite3.IntegrityError:
             raise ValueError("Usuário já existe")
 
-def insertProduto(nome, valor_custo, valor_venda, quant):
+def insertProduto(nome, valor_custo, valor_venda, quant, foto=None, foto_mime=None):
     with conectar() as connector:
         cursor = connector.cursor()
-        cursor.execute("insert into Produto (nome_prod, valor_custo, valor_venda, quant_prod) Values (?, ?, ?, ?)",(nome, valor_custo, valor_venda, quant))
+        cursor.execute(
+            "insert into Produto (nome_prod, valor_custo, valor_venda, quant_prod, foto, foto_mime) Values (?, ?, ?, ?, ?, ?)",
+            (nome, valor_custo, valor_venda, quant, foto, foto_mime)
+        )
         connector.commit()
 
 def selectProdutos():
     with conectar() as connector:
         cursor = connector.cursor()
-        cursor.execute("select * from Produto where ativo = 1")
-        return cursor.fetchall()
+        cursor.execute("select id_prod, nome_prod, valor_custo, valor_venda, quant_prod, ativo, foto_mime from Produto where ativo = 1")
+        produtos = []
+        for row in cursor.fetchall():
+            produto = dict(row)
+            produto["foto_url"] = (
+                f"/produto/{produto['id_prod']}/foto"
+                if produto.get("foto_mime") else None
+            )
+            produtos.append(produto)
+        return produtos
 
 def buscarProduto(id_prod):
     with conectar() as connector:
         cursor = connector.cursor()
-        cursor.execute("select * from Produto where id_prod = ? and ativo = 1",(id_prod,))
-        return cursor.fetchone()
+        cursor.execute("select * from Produto where id_prod = ? and ativo = 1", (id_prod,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
 
 def updatePrecoVenda(id_prod, valor):
     with conectar() as connector:
@@ -61,6 +73,13 @@ def insertVenda(venda):
                 raise ValueError(f"Quantidade insuficiente em estoque para o produto com ID {produto_id}")
     connector.commit()
     connector.close()
+
+def buscarFotoProduto(id_prod):
+    with conectar() as connector:
+        cursor = connector.cursor()
+        cursor.execute("SELECT foto, foto_mime FROM Produto WHERE id_prod = ? AND ativo = 1", (id_prod,))
+        return cursor.fetchone()
+
 
 def selectVendas():
     with conectar() as connector:

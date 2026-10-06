@@ -4,20 +4,40 @@ from models.produto import Produto
 from models.conta import Conta
 from models.saldo import SaldoDiario
 from models.user import User
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from leet_connect import conectar, inicializar_banco
 from CRUD import *
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf.csrf import CSRFProtect
+import base64
+import binascii
+import io
 from datetime import date
 import os
 from dotenv import load_dotenv
 import math
+import secrets
+from pathlib import Path
 
+diretorio_atual = Path.home()/".leet_empresas"
+diretorio_atual.mkdir(parents=True, exist_ok=True)
+caminho_arquivo_env = diretorio_atual/"secret.key"
+def obter_ou_criar_chave_secreta():
+    if caminho_arquivo_env.exists():
+        with open(caminho_arquivo_env, "r") as arquivo:
+            return arquivo.read().strip()
+    else:
+        chave_secreta = secrets.token_hex(16)
+        with open(caminho_arquivo_env, "w") as arquivo:
+            arquivo.write(chave_secreta)
+        return chave_secreta
+    
 load_dotenv()
 
 app = Flask(__name__)
 
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = obter_ou_criar_chave_secreta()
+csrf = CSRFProtect(app)
 inicializar_banco()
 
 
@@ -140,6 +160,16 @@ def dashboard():
         notificacoes=notificacoes
     )
 
+@app.route('/produto/<int:id_prod>/foto')
+def foto_produto(id_prod):
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+    foto = buscarFotoProduto(id_prod)
+    if not foto or not foto["foto"] or not foto["foto_mime"]:
+        return "Foto não encontrada", 404
+    return send_file(io.BytesIO(foto["foto"]), mimetype=foto["foto_mime"])
+
+
 @app.route('/cadastrar-produto', methods=['POST'])
 def cadastrar_produto():
     if "usuario" not in session:
@@ -158,8 +188,31 @@ def cadastrar_produto():
     if not nome or valor_custo < 0 or valor_venda < 0 or quant < 0:
         flash("Valores não podem ser negativos", "error")
         return redirect(url_for('dashboard'))
+    foto = None
+    foto_mime = None
+    foto_base64 = request.form.get("foto_base64", "").strip()
+    if foto_base64:
+        try:
+            cabecalho, dados = foto_base64.split(",", 1)
+            mime = cabecalho.split(";", 1)[0].replace("data:", "").strip().lower()
+            if mime not in {"image/png", "image/jpeg"}:
+                raise ValueError("Formato de foto não permitido")
+            foto = base64.b64decode(dados, validate=True)
+            if len(foto) > 2 * 1024 * 1024:
+                raise ValueError("A foto deve ter no máximo 2 MB")
+            assinaturas = {
+                "image/png": b"\x89PNG\r\n\x1a\n",
+                "image/jpeg": b"\xff\xd8\xff",
+            }
+            if not foto.startswith(assinaturas[mime]):
+                raise ValueError("Arquivo de imagem inválido")
+            foto_mime = mime
+        except (ValueError, binascii.Error):
+            flash("Foto inválida. Use PNG ou JPEG de até 2 MB.", "error")
+            return redirect(url_for('dashboard'))
+
     cadastrar_produto = Produto(nome, float(valor_custo), float(valor_venda), int(quant))
-    insertProduto(*cadastrar_produto.getInformacoes())
+    insertProduto(*cadastrar_produto.getInformacoes(), foto=foto, foto_mime=foto_mime)
     flash("Produto cadastrado com sucesso", "success")
     return redirect(url_for('dashboard'))
 
@@ -266,6 +319,5 @@ def logout():
     session.clear()  # Limpa os dados da sessão
     return redirect(url_for('login'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
-    
+if __name__ == "__main__":
+    app.run(host="127.0.0.1",port=5000,debug=False)

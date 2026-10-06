@@ -29,6 +29,7 @@ Controle seu estoque, organize suas contas e acompanhe suas vendas em tempo real
                 {% endwith %}
 
                 <form action="/login" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label for="usuario">Usuário</label>
                         <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário" required>

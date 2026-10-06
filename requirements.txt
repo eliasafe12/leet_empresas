@@ -6,3 +6,8 @@ Jinja2==3.1.6
 MarkupSafe==3.0.3
 Werkzeug==3.1.9
 python-dotenv
+pywebview
+qtpy
+PySide6
+pyinstaller
+Flask-WTF==1.2.2
