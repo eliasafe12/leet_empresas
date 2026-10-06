@@ -4,13 +4,14 @@ from models.produto import Produto
 from models.conta import Conta
 from models.saldo import SaldoDiario
 from models.user import User
-from flask import Flask, render_template, request, redirect, url_for, session, abort
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from leet_connect import conectar, inicializar_banco
 from CRUD import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
 import os
 from dotenv import load_dotenv
+import math
 
 load_dotenv()
 
@@ -20,6 +21,12 @@ app.secret_key = os.getenv("SECRET_KEY")
 inicializar_banco()
 
 
+def validar_data(data):
+    try:
+        return datetime.strptime(data, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        raise ValueError("Data inválida")
+    
 def ler_itens(form):
     codigos = form.getlist("codigo[]")
     quantidades = form.getlist("quantidade[]")
@@ -50,12 +57,15 @@ def login():
         user_id = request.form.get("usuario")
         senha = request.form.get("senha")
         if not user_id or not senha:
-            return "Preencha usuário e senha", 400
+            flash("Preencha usuário e senha", "error")
+            return redirect(url_for("login"))
         usuario = selectUsuario(user_id)
         if not usuario:
-            return "Usuário ou senha incorretos", 404
+            flash("Usuário ou senha incorretos", "error")
+            return redirect(url_for("login"))
         if not check_password_hash(usuario["senha"], senha):
-            return "Usuário ou senha incorretos", 401
+            flash("Usuário ou senha incorretos", "error")
+            return redirect(url_for("login"))
         session["usuario"] = usuario["user_id"]
         session["empresa"] = usuario["nome_empresa"]
         return redirect(url_for("dashboard"))
@@ -69,12 +79,14 @@ def cadastro():
         nome_empresa = request.form.get('nome_empresa')
         senha = request.form.get('senha')
         if not user_id or not nome_empresa or not senha:
-            return "Preencha todos os campos", 400
-        #usuario = selectUsuario(user_id)
-        #if usuario:
-            #return "Usuário já existe", 400
-        cadastrar_usuario = User(user_id, nome_empresa, senha)
-        insertUsuario(*cadastrar_usuario.getInformacoes())
+            flash("Preencha todos os campos", "error")
+            return redirect(url_for('cadastro'))
+        try:
+            cadastrar_usuario = User(user_id, nome_empresa, senha)
+            insertUsuario(*cadastrar_usuario.getInformacoes())
+        except ValueError as e:
+            flash(str(e), "error")
+            return render_template('cadastro.html')
         return redirect(url_for('login'))
         
     return render_template('cadastro.html')
@@ -109,6 +121,7 @@ def dashboard():
             notificacoes.append(aviso)
     for i in contas:
         objeto_conta = Conta(i["descricao_conta"], i["valor_conta"], i["vencimento"])
+        
         aviso = objeto_conta.avisarVencimento()
         if aviso:
             notificacoes.append(aviso)
@@ -135,13 +148,19 @@ def cadastrar_produto():
         nome = request.form.get('nome', '').strip()
         valor_custo = float(request.form.get('valor_custo').replace(',', '.'))
         valor_venda = float(request.form.get('valor_venda').replace(',', '.'))
+        if not math.isfinite(valor_custo) or not math.isfinite(valor_venda):
+            return "Preencha os valores corretamente", 400
+        
         quant = int(request.form.get('quantidade'))
     except (TypeError, ValueError):
-        return "Preencha os valores corretamente", 400
+        flash("Preencha os valores corretamente", "error")
+        return redirect(url_for('dashboard'))
     if not nome or valor_custo < 0 or valor_venda < 0 or quant < 0:
-        return "Valores não podem ser negativos", 400
+        flash("Valores não podem ser negativos", "error")
+        return redirect(url_for('dashboard'))
     cadastrar_produto = Produto(nome, float(valor_custo), float(valor_venda), int(quant))
     insertProduto(*cadastrar_produto.getInformacoes())
+    flash("Produto cadastrado com sucesso", "success")
     return redirect(url_for('dashboard'))
 
 @app.route('/editar-preco', methods=['POST'])
@@ -180,7 +199,7 @@ def remover_item():
     codigo = dados.get('codigo')
     tipo_item = dados.get('tipo')
     deleteItem(codigo, tipo_item)
-    
+    flash("Item removido com sucesso", "success")
     return redirect(url_for('dashboard'))
 
 @app.route('/registrar-venda', methods=['POST'])
@@ -195,9 +214,12 @@ def registrar_venda():
     for codigo, quantidade in itens.items():
         produto = buscarProduto(codigo)
         if not produto:
-            return "Produto não encontrado", 404
-        if int(quantidade) > produto["quant_prod"]:
-            return "Quantidade insuficiente em estoque", 400
+            flash("Produto não encontrado", "error")
+            return redirect(url_for('dashboard'))
+        if not math.isfinite(float(quantidade)):
+            flash("Quantidade inválida", "error")
+            return redirect(url_for('dashboard'))
+            
         cadastrar_venda.append((produto["id_prod"], produto["valor_venda"], int(quantidade)))
     insertVenda(Venda(cadastrar_venda))
     return redirect(url_for('dashboard'))
@@ -215,6 +237,8 @@ def registrar_compra():
         produto = buscarProduto(codigo)
         if not produto:
             return "Produto não encontrado", 404
+        if not math.isfinite(float(quantidade)):
+            return "Quantidade inválida", 400
         cadastrar_compra.append((produto["id_prod"], produto["valor_custo"], int(quantidade)))
     insertCompra(Compra(cadastrar_compra))
     return redirect(url_for('dashboard'))
@@ -226,6 +250,12 @@ def registrar_conta():
     descricao = request.form.get('descricao')
     valor = request.form.get('valor')
     vencimento = request.form.get('vencimento')
+    try:
+        vencimento = validar_data(vencimento)
+    except ValueError as e:
+        return str(e), 400
+    if not math.isfinite(float(valor)):
+        return "Valor inválido", 400
     cadastrar_conta = Conta(descricao, float(valor), vencimento)
     insertConta(*cadastrar_conta.getInformacoes())
     return redirect(url_for('dashboard'))

@@ -10,9 +10,12 @@ def selectUsuario(user_id):
 
 def insertUsuario(user_id, nome_empresa, senha):
     with conectar() as connector:
-        cursor = connector.cursor()
-        cursor.execute("insert into Usuario (user_id, nome_empresa, senha) Values (?, ?, ?)",(user_id, nome_empresa, senha))
-        connector.commit()
+        try:
+            cursor = connector.cursor()
+            cursor.execute("insert into Usuario (user_id, nome_empresa, senha) Values (?, ?, ?)",(user_id, nome_empresa, senha))
+            connector.commit()
+        except sqlite3.IntegrityError:
+            raise ValueError("Usuário já existe")
 
 def insertProduto(nome, valor_custo, valor_venda, quant):
     with conectar() as connector:
@@ -29,7 +32,7 @@ def selectProdutos():
 def buscarProduto(id_prod):
     with conectar() as connector:
         cursor = connector.cursor()
-        cursor.execute("select * from Produto where id_prod = ?",(id_prod,))
+        cursor.execute("select * from Produto where id_prod = ? and ativo = 1",(id_prod,))
         return cursor.fetchone()
 
 def updatePrecoVenda(id_prod, valor):
@@ -53,7 +56,9 @@ def insertVenda(venda):
             produto_id = produto[0]
             quantidade = produto[2]
             cursor.execute("INSERT INTO ProdutoVendido (produto_id, venda_id, quantidade_vendida) VALUES (?, ?, ?)", (produto_id,venda_id,quantidade))
-            cursor.execute("UPDATE Produto SET quant_prod = quant_prod - ? WHERE id_prod = ?", (quantidade, produto_id))
+            cursor.execute("UPDATE Produto SET quant_prod = quant_prod - ? WHERE id_prod = ? AND quant_prod >= ? AND ativo = 1", (quantidade, produto_id, quantidade))
+            if cursor.rowcount != 1:
+                raise ValueError(f"Quantidade insuficiente em estoque para o produto com ID {produto_id}")
     connector.commit()
     connector.close()
 
@@ -72,7 +77,7 @@ def insertCompra(compra):
             produto_id = produto[0]
             quantidade = produto[2]
             cursor.execute("INSERT INTO ProdutoComprado (produto_id, compra_id, quantidade_comprada) VALUES (?, ?, ?)", (produto_id, compra_id, quantidade))
-            cursor.execute("UPDATE Produto SET quant_prod = quant_prod + ? WHERE id_prod = ?", (quantidade, produto_id))
+            cursor.execute("UPDATE Produto SET quant_prod = quant_prod + ? WHERE id_prod = ? AND ativo = 1", (quantidade, produto_id))
     connector.commit()
     connector.close()
 
@@ -89,8 +94,10 @@ def deleteItem(id_prod, tipo_item):
             cursor.execute("UPDATE Produto SET ativo = 0 WHERE id_prod = ?", (id_prod,))
         elif tipo_item == "venda":
             cursor.execute("DELETE FROM Venda WHERE id_venda = ?", (id_prod,))
+            cursor.execute("UPDATE Produto SET quant_prod = quant_prod + (SELECT quantidade_vendida FROM ProdutoVendido WHERE venda_id = ?) WHERE id_prod = (SELECT produto_id FROM ProdutoVendido WHERE venda_id = ?)", (id_prod, id_prod))
         elif tipo_item == "compra":
             cursor.execute("DELETE FROM Compra WHERE id_compra = ?", (id_prod,))
+            cursor.execute("UPDATE Produto SET quant_prod = quant_prod - (SELECT quantidade_comprada FROM ProdutoComprado WHERE compra_id = ?) WHERE id_prod = (SELECT produto_id FROM ProdutoComprado WHERE compra_id = ?)", (id_prod, id_prod))
         elif tipo_item == "conta":
             cursor.execute("DELETE FROM Conta WHERE id_conta = ?", (id_prod,))
         else:
