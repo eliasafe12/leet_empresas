@@ -1138,3 +1138,13 @@ hr {
         width: 100%;
     }
 }
+
+.header-grupo {
+    height: 400px;
+    object-fit: contain;
+}
+
+
+.brand-grupo {
+    max-width: 500px;
+}

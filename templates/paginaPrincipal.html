@@ -55,6 +55,7 @@
         <button class="tab-btn" onclick="openTab(event, 'tab-produtos')">Gerenciar Produtos</button>
         <button class="tab-btn" onclick="openTab(event, 'tab-vendas')">Gerenciar Vendas</button>
         <button class="tab-btn" onclick="openTab(event, 'tab-contas')">Gerenciar Contas / Compras</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-somos')">Quem somos?</button>
     </nav>
 
     <main class="content-container">
@@ -306,6 +307,26 @@
                 </div>
             </div>
         </section>
+
+
+        // Quem somos
+        <section id="tab-somos" class="tab-content">
+            <div style="text-align: center; width: 100%;">
+                <h3 style="text-align: center; font-size: 2rem; margin-bottom: 1rem;">Sobre nós</h3>
+
+                <img src="{{ url_for('static', filename='img/nos.jpg') }}" 
+                    alt="GrupoLeet" 
+                    class="header-grupo" 
+                    style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto;">
+
+                    <p style="color: #ffffff;"> Nós somos o LEET, composto pelo Leonardo, Eliasafe, Elias & Thomaz. Somos uma equipe da INFO 2 e temos como objetivo tirar A no trimestre!
+ </p>
+                    <p style="color: #ffffff;">Leet - L(eonardo) E(liasafe) E(lias) (T)homaz</p>
+
+                </div>
+
+        </section>
+
 
         <section id="tab-contas" class="tab-content">
             <div class="two-col-layout">
