@@ -309,25 +309,116 @@
         </section>
 
 
-        // Quem somos
-        <section id="tab-somos" class="tab-content">
-            <div style="text-align: center; width: 100%;">
-                <h3 style="text-align: center; font-size: 2rem; margin-bottom: 1rem;">Sobre nós</h3>
+<!-- ABA QUEM SOMOS -->
+<section id="tab-somos" class="tab-content" style="max-width: 1000px; margin: 0 auto; padding: 2rem 1rem;">
+    
+    <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); margin-bottom: 3rem;">
+        <h2 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #ffffff 0%, #fdfdfd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Sobre Nós
+        </h2>
+        <p style="color: #ffffff; font-size: 0.95rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">
+            Grupo LEET
+        </p>
 
-                <img src="{{ url_for('static', filename='img/nos.jpg') }}" 
-                    alt="GrupoLeet" 
-                    class="header-grupo" 
-                    style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto;">
+        <!-- FOTO DO GRUPO -->
+        <div style="position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <img src="{{ url_for('static', filename='img/nos.jpg') }}" 
+                 alt="Grupo LEET" 
+                 style="width: 100%; max-height: 400px; object-fit: cover; display: block;">
+        </div>
 
-                    <p style="color: #ffffff;"> Nós somos o LEET, composto pelo Leonardo, Eliasafe, Elias & Thomaz. Somos uma equipe da INFO 2 e temos como objetivo tirar A no trimestre!
- </p>
-                    <p style="color: #ffffff;">Leet - L(eonardo) E(liasafe) E(lias) (T)homaz</p>
+        <p style="color: #ffffff; font-size: 1.1rem; line-height: 1.6; max-width: 700px; margin: 0 auto 1rem auto;">
+            Nós somos o <strong style="color: #38bdf8; font-weight: 700;">LEET</strong>! Uma equipe dedicada do curso de informática 2</span> com o objetivo de tirar nota <strong>A</strong> neste trimestre!
+        </p>
 
-                </div>
+        <div style="display: inline-block; padding: 0.6rem 1.2rem; border-radius: 50px; color: #cbd5e1; font-size: 0.9rem;">
+            <strong style="color: #38bdf8;">L</strong>eonardo; 
+            <strong style="color: #38bdf8;">E</strong>liasafe; 
+            <strong style="color: #38bdf8;">E</strong>lias; 
+            <strong style="color: #38bdf8;">T</strong>homaz.
+        </div>
+    </div>
 
-        </section>
+    <!--INTEGRANTES-->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
 
+        <!--LEONARDO-->
+        <div class="membro-card" style="display: flex; flex-direction: row; align-items: center; background: rgba(30, 30, 36, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="flex: 0 0 240px; height: 240px;">
+                <img src="{{ url_for('static', filename='img/Leonardo.jpg') }}" alt="Leonardo" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="padding: 1.5rem; flex: 1;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.5rem;">Leonardo</h3>
+                </span>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    Meu nome é Leonardo, eu fui um dos responsáveis pelo Banco de dados do projeto. Gosto da área de exatas e faço academia :)
+                </p>
+            </div>
+        </div>
 
+        <!--ELIASAFE-->
+        <div class="membro-card" style="display: flex; flex-direction: row-reverse; align-items: center; background: rgba(30, 30, 36, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="flex: 0 0 240px; height: 240px;">
+                <img src="{{ url_for('static', filename='img/Eliasafe.jpg') }}" alt="Eliasafe" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="padding: 1.5rem; flex: 1; text-align: right;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.5rem;">Eliasafe</h3>
+                </span>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    Eu sou o Eliasafe, o faz-tudo do projeto e o mais lindo do grupo. Viciado em programação e em música, tamo junto.
+                </p>
+            </div>
+        </div>
+
+        <!--ELIAS-->
+        <div class="membro-card" style="display: flex; flex-direction: row; align-items: center; background: rgba(30, 30, 36, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="flex: 0 0 240px; height: 240px;">
+                <img src="{{ url_for('static', filename='img/Elias.jpg') }}" alt="Elias" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="padding: 1.5rem; flex: 1;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.5rem;">Elias</h3>
+                </span>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    Sou o Elias, apaixonado por tecnologia da informação com foco em computadores (hardware). Também sou músico (toco violino e violão) e faço parte de uma orquestra. A cada dia busco evoluir, lutando por mais conhecimentos e novos aprendizados.
+                </p>
+            </div>
+        </div>
+
+        <!--THOMAZ-->
+        <div class="membro-card" style="display: flex; flex-direction: row-reverse; align-items: center; background: rgba(30, 30, 36, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+            <div style="flex: 0 0 240px; height: 240px;">
+                <img src="{{ url_for('static', filename='img/Thomaz.jpeg') }}" alt="Thomaz" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div style="padding: 1.5rem; flex: 1; text-align: right;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 1.5rem;">Thomaz</h3>
+                </span>
+                <p style="color: #e0e0e0; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    Meu nome é Thomaz, e fui um dos responsáveis pela conceituação e desenvolvimento do Banco de Dados do projeto. Sou estudante do segundo ano do técnico em Informática do IFPR Campus Pinhais, além de ser atleta e músico nas horas vagas.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RESPONSIVIDADE PARA DISPOSITIVOS MÓVEIS -->
+    <style>
+        @media (max-width: 650px) {
+            .membro-card {
+                flex-direction: column !important;
+                text-align: center !important;
+            }
+            .membro-card div {
+                text-align: center !important;
+            }
+            .membro-card div:first-child {
+                width: 100% !important;
+                flex: 0 0 220px !important;
+                height: 220px !important;
+            }
+        }
+    </style>
+
+</section>
         <section id="tab-contas" class="tab-content">
             <div class="two-col-layout">
                 <div class="col-esquerda">
