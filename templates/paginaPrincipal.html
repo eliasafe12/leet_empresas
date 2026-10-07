@@ -76,6 +76,7 @@
             <div class="dash-card graph-card">
                 <h3>Comparativo do Dia: Compras vs Vendas (R$)</h3>
                 <canvas id="chartComprasVendas"></canvas>
+                <button onclick="registrarSaldo({{ saldo_dia | default(0.0) }})" class="btn-sm">Salvar Saldo</button>
             </div>
 
             <div class="dash-card">
@@ -390,7 +391,7 @@
     <script>
         const totalVendas = Number("{{ total_vendas_hoje if total_vendas_hoje is defined else 0 }}") || 0;
         const totalCompras = Number("{{ total_compras_hoje if total_compras_hoje is defined else 0 }}") || 0;
-
+        
         const ctx = document.getElementById('chartComprasVendas').getContext('2d');
         new Chart(ctx, {
             type: 'bar',

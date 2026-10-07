@@ -139,3 +139,8 @@ def selectContas():
         cursor.execute("select * from Conta")
         return cursor.fetchall()
 
+def insertSaldoDiario(valor,data):
+    with conectar() as connector:
+        cursor = connector.cursor()
+        cursor.execute("insert into SaldoDiario (valor_saldo, data_saldo) values(?, ?)", (valor,data))
+

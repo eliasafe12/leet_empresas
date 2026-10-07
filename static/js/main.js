@@ -1,3 +1,29 @@
+function registrarSaldo(saldo) {
+    fetch('/registrar-saldo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            saldo: parseFloat(saldo)
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("Saldo salvo com sucesso!");
+            window.location.reload(); // Recarrega a página atual para atualizar os dados
+        } else {
+            return response.json().then(data => {
+                alert("Erro ao salvar saldo: " + (data.erro || "Erro desconhecido"));
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Erro na requisição:", error);
+        alert("Erro de conexão ao salvar Saldo.");
+    });
+}
 // Função para editar o preço do produto
 function editarPreco(codigoProduto) {
     const tipoPreco = prompt('Introduza qual o tipo de preço (Custo/Venda):');
