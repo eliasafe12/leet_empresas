@@ -2,7 +2,7 @@ from pathlib import Path
 from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 
-BASE_DIR = Path.cwd()
+BASE_DIR = Path(SPEC).resolve().parent
 
 
 # Modelos do projeto
