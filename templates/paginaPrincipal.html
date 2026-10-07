@@ -80,6 +80,32 @@
             </div>
 
             <div class="dash-card">
+                <h3 class="section-title">Últimos Saldos</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Código do Saldo</th>
+                            <th>Valor Total</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for saldo in saldos %}
+                            <tr>
+                                <td>{{ saldo["saldo_id"] }}</td>
+                                <td>R$ {{ "%.2f"|format(saldo["valor_saldo"]) }}</td>
+                                <td>{{ saldo["data_saldo"] | default('-') }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #888;">Nenhuma venda registrada.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="dash-card">
                 <h3 class="section-title">Últimas Vendas</h3>
                 <table class="data-table">
                     <thead>

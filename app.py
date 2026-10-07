@@ -120,6 +120,7 @@ def dashboard():
     contas = selectContas()
     vendas = selectVendas()
     compras = selectCompras()
+    saldos = selectSaldos()
     notificacoes = []
     total_vendas_hoje = 0
     for i in vendas:
@@ -157,7 +158,8 @@ def dashboard():
         contas=contas,
         vendas=vendas,
         compras=compras,
-        notificacoes=notificacoes
+        notificacoes=notificacoes,
+        saldos=saldos
     )
 
 @app.route('/produto/<int:id_prod>/foto')
@@ -320,6 +322,15 @@ def registrar_conta():
     insertConta(*cadastrar_conta.getInformacoes())
     return redirect(url_for('dashboard'))
 
+@app.route('/registrar-saldo', methods=['POST'])
+def registrar_saldo():
+    dados = request.get_json(silent=True)
+    if not dados:
+        return {"erro": "JSON inválido"}, 400
+    saldo = dados.get('saldo')
+    insertSaldoDiario(saldo,date.today().strftime("%d/%m/%Y"))
+    return redirect(url_for('dashboard'))
+    
 # ROTA DE LOGOUT
 @app.route('/logout')
 def logout():
