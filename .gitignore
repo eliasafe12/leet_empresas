@@ -2,3 +2,6 @@
 leet.db
 .env
 .secret.key
+build/
+dist/
+/__pycache__/
