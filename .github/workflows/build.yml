@@ -1,22 +1,21 @@
-name: Build Leet Empresasx
+name: Build Leet Empresas
 
 on:
   push:
     tags:
       - "v*"
 
-jobs:
+permissions:
+  contents: write
 
-  build-linux:
-    name: Linux
+jobs:
+  linux:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -27,31 +26,25 @@ jobs:
           pip install pyinstaller
 
       - name: Gerar executável
-        run: |
-          pyinstaller LeetEmpresas.spec
+        run: pyinstaller --clean LeetEmpresas.spec
 
       - name: Compactar
         run: |
           cd dist
-          zip -r LeetEmpresas-Linux.zip LeetEmpresas
+          zip -r ../LeetEmpresas-Linux.zip LeetEmpresas
 
-      - name: Publicar artefato
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: LeetEmpresas-Linux
-          path: dist/LeetEmpresas-Linux.zip
+          path: LeetEmpresas-Linux.zip
 
-
-  build-windows:
-    name: Windows
+  windows:
     runs-on: windows-latest
 
     steps:
-      - name: Baixar código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -62,30 +55,24 @@ jobs:
           pip install pyinstaller
 
       - name: Gerar executável
-        run: |
-          pyinstaller LeetEmpresas.spec
+        run: pyinstaller --clean LeetEmpresas.spec
 
       - name: Compactar
         run: |
-          Compress-Archive -Path dist/LeetEmpresas -DestinationPath dist/LeetEmpresas-Windows.zip
+          Compress-Archive -Path dist/LeetEmpresas -DestinationPath LeetEmpresas-Windows.zip
 
-      - name: Publicar artefato
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: LeetEmpresas-Windows
-          path: dist/LeetEmpresas-Windows.zip
+          path: LeetEmpresas-Windows.zip
 
-
-  build-macos:
-    name: macOS
+  macos:
     runs-on: macos-latest
 
     steps:
-      - name: Baixar código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configurar Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -96,16 +83,50 @@ jobs:
           pip install pyinstaller
 
       - name: Gerar executável
-        run: |
-          pyinstaller LeetEmpresas.spec
+        run: pyinstaller --clean LeetEmpresas.spec
 
       - name: Compactar
         run: |
           cd dist
-          zip -r LeetEmpresas-macOS.zip LeetEmpresas
+          zip -r ../LeetEmpresas-macOS.zip LeetEmpresas
 
-      - name: Publicar artefato
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: LeetEmpresas-macOS
-          path: dist/LeetEmpresas-macOS.zip
+          path: LeetEmpresas-macOS.zip
+
+  release:
+    needs:
+      - linux
+      - windows
+      - macos
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: LeetEmpresas-Linux
+          path: release
+
+      - name: Baixar Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: LeetEmpresas-Windows
+          path: release
+
+      - name: Baixar macOS
+        uses: actions/download-artifact@v4
+        with:
+          name: LeetEmpresas-macOS
+          path: release
+
+      - name: Criar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release/LeetEmpresas-Linux.zip
+            release/LeetEmpresas-Windows.zip
+            release/LeetEmpresas-macOS.zip
