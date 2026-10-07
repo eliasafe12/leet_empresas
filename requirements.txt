@@ -11,3 +11,5 @@ qtpy
 PySide6
 pyinstaller
 Flask-WTF==1.2.2
+pythonnet 
+clr-loader
