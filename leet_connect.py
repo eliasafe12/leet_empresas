@@ -2,17 +2,17 @@ import sqlite3
 from pathlib import Path
 
 diretorio_atual = Path.home()/".leet_empresas"
-diretorio_atual.mkdir(parents=True, exist_ok=True)
-banco_dados = diretorio_atual/"leet.db"
+diretorio_atual.mkdir(parents=True, exist_ok=True) # cria pasta para arquivos do projeto
+banco_dados = diretorio_atual/"leet.db" 
 
 #arquivo utilizado para a criação das tabelas.
 
 def conectar():
     connector = sqlite3.connect(banco_dados, detect_types=sqlite3.PARSE_DECLTYPES |
-                                 sqlite3.PARSE_COLNAMES)
+                                 sqlite3.PARSE_COLNAMES) # cria ou inicializa banco de dados
     connector.row_factory = sqlite3.Row
     cursor = connector.cursor()
-    cursor.execute("PRAGMA foreign_keys = ON;")
+    cursor.execute("PRAGMA foreign_keys = ON;") # ativa chaves estrangeiras
     return connector
 
 #tipos de variaveis sqlite:
@@ -22,7 +22,7 @@ def conectar():
 #TEXT
 #BLOB
 
-def inicializar_banco():
+def inicializar_banco(): #cria ou inicializa as tabelas 
     connector = conectar()
     cursor = connector.cursor()
 

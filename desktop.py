@@ -5,7 +5,7 @@ import webview
 from app import app
 
 
-def iniciar_flask():
+def iniciar_flask(): # inicia server flask
     app.run(
         host="127.0.0.1",
         port=5000,
@@ -16,7 +16,7 @@ def iniciar_flask():
 
 if __name__ == "__main__":
     servidor = threading.Thread(
-        target=iniciar_flask,
+        target=iniciar_flask, # chama a função iniciar_flask
         daemon=True
     )
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     time.sleep(1)
 
-    webview.create_window(
+    webview.create_window( # cria a janela com o server
         "Leet Empresas",
         "http://127.0.0.1:5000",
         width=1280,

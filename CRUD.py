@@ -1,15 +1,14 @@
 import sqlite3
 from leet_connect import conectar
 from decimal import Decimal
-# arquivo placeholder utilizado para testes por enquanto
 
-def selectUsuario(user_id):
+def selectUsuario(user_id): # procura usuário por id
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("select * from Usuario where user_id = ?",(user_id,))
         return cursor.fetchone()
 
-def insertUsuario(user_id, nome_empresa, senha):
+def insertUsuario(user_id, nome_empresa, senha): # cadastra o usuário
     with conectar() as connector:
         try:
             cursor = connector.cursor()
@@ -18,7 +17,7 @@ def insertUsuario(user_id, nome_empresa, senha):
         except sqlite3.IntegrityError:
             raise ValueError("Usuário já existe")
 
-def insertProduto(nome, valor_custo, valor_venda, quant, foto=None, foto_mime=None):
+def insertProduto(nome, valor_custo, valor_venda, quant, foto=None, foto_mime=None): # cadastra o produto
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute(
@@ -27,7 +26,7 @@ def insertProduto(nome, valor_custo, valor_venda, quant, foto=None, foto_mime=No
         )
         connector.commit()
 
-def selectProdutos():
+def selectProdutos(): # seleciona os produtos cadastrados
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("select id_prod, nome_prod, valor_custo, valor_venda, quant_prod, ativo, foto_mime from Produto where ativo = 1")
@@ -41,31 +40,31 @@ def selectProdutos():
             produtos.append(produto)
         return produtos
 
-def buscarProduto(id_prod):
+def buscarProduto(id_prod): # procura produto por id
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("select * from Produto where id_prod = ? and ativo = 1", (id_prod,))
         row = cursor.fetchone()
         return dict(row) if row else None
 
-def updatePrecoVenda(id_prod, valor):
+def updatePrecoVenda(id_prod, valor): # atualiza preço de venda
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("update Produto set valor_venda = ? where id_prod = ?", (float(valor), id_prod))
         connector.commit()
 
-def updatePrecoCusto(id_prod, valor):
+def updatePrecoCusto(id_prod, valor): # atualiza preço de compra
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("update Produto set valor_custo = ? where id_prod = ?", (float(valor), id_prod))
         connector.commit()
 
-def insertVenda(venda):
+def insertVenda(venda): # cadastra venda
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("INSERT INTO Venda (data_venda, preco_total) VALUES (?, ?)", (venda.data, float(venda.preco_final)))
         venda_id = cursor.lastrowid
-        for produto in venda.produtos:
+        for produto in venda.produtos: # cadastra os produtos vendidos
             produto_id = produto[0]
             quantidade = produto[2]
             cursor.execute("UPDATE Produto SET quant_prod = quant_prod - ? WHERE id_prod = ? AND ativo = 1", (int(quantidade), produto_id))
@@ -73,37 +72,37 @@ def insertVenda(venda):
     connector.commit()
     connector.close()
 
-def buscarFotoProduto(id_prod):
+def buscarFotoProduto(id_prod): # busca a foto do produto
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("SELECT foto, foto_mime FROM Produto WHERE id_prod = ? AND ativo = 1", (id_prod,))
         return cursor.fetchone()
 
 
-def selectVendas():
+def selectVendas(): # seleciona as vendas cadastradas
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("SELECT * FROM Venda")
         return cursor.fetchall()
 
-def insertCompra(compra):
+def insertCompra(compra): # cadastra compra
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("INSERT INTO Compra (preco_total, data_compra) VALUES (?, ?)", (float(compra.preco_final), compra.data))
         compra_id = cursor.lastrowid
-        for produto in compra.produtos:
+        for produto in compra.produtos: # cadastra os produtos comprados
             produto_id = produto[0]
             quantidade = produto[2]
             cursor.execute("INSERT INTO ProdutoComprado (produto_id, compra_id, quantidade_comprada) VALUES (?, ?, ?)", (produto_id, compra_id, int(quantidade)))
             cursor.execute("UPDATE Produto SET quant_prod = quant_prod + ? WHERE id_prod = ? AND ativo = 1", (int(quantidade), produto_id))
 
-def selectCompras():
+def selectCompras(): # seleciona as compras
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("SELECT * FROM Compra")
         return cursor.fetchall()
 
-def deleteItem(id_item, tipo_item):
+def deleteItem(id_item, tipo_item): # deleta item por tipo
     with conectar() as connector:
         cursor = connector.cursor()
         if tipo_item == "produto":
@@ -135,31 +134,31 @@ def deleteItem(id_item, tipo_item):
             raise ValueError("Tipo de item inválido")
 
         connector.commit()
-def updatePreco(id_prod, valor):
+def updatePreco(id_prod, valor): # atualiza preço dos produtos por id
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("update Produto set valor_venda = ? where id_prod = ?", (float(valor), id_prod))
         connector.commit()
 
-def insertConta(descricao, valor, vencimento):
+def insertConta(descricao, valor, vencimento): # cadastra conta
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("insert into Conta (descricao_conta, valor_conta, vencimento) Values (?, ?, ?)", (descricao, float(valor), vencimento))
         connector.commit()
 
-def selectContas():
+def selectContas(): # seleciona as contas
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("select * from Conta")
         return cursor.fetchall()
 
-def insertSaldoDiario(valor,data):
+def insertSaldoDiario(valor,data): # cadastra o saldo diario
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("insert into SaldoDiario (valor_saldo, data_saldo) values(?, ?)", (float(valor), data))
         connector.commit()
 
-def selectSaldos():
+def selectSaldos(): # seleciona os saldos diarios
     with conectar() as connector:
         cursor = connector.cursor()
         cursor.execute("select * from SaldoDiario")
