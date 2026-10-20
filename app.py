@@ -251,11 +251,6 @@ def dashboard():
         if aviso:
             notificacoes.append(aviso)
 
-    # exibe informações temporárias no terminal para auxiliar na depuração
-    print("DATA:", data_atual)
-    print("VENDAS:", total_vendas_hoje)
-    print("COMPRAS:", total_compras_hoje)
-
     # renderiza o painel e envia os dados consultados para o template html
     return render_template(
         "paginaPrincipal.html",
