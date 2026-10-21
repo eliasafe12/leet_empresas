@@ -177,13 +177,21 @@ async function iniciarCamera() {
 function capturarFoto() {
     const video = document.getElementById('video-preview');
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 300;
-    canvas.height = video.videoHeight || 200;
-    
+    const larguraMax = 800;
+    let w = video.videoWidth || 300;
+    let h = video.videoHeight || 200;
+    if (w > larguraMax) {
+        h = Math.round(h * larguraMax / w);
+        w = larguraMax;
+    }
+    canvas.width = w;
+    canvas.height = h;
+
     const context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    const fotoDataUrl = canvas.toDataURL('image/png');
+    context.drawImage(video, 0, 0, w, h);
+
+    // JPEG com qualidade 0.8 pesa uma fração do PNG
+    const fotoDataUrl = canvas.toDataURL('image/jpeg', 0.8);
     document.getElementById('foto_base64').value = fotoDataUrl;
     
     const photoPreview = document.getElementById('photo-preview');
