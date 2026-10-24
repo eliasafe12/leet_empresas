@@ -544,3 +544,7 @@ def registrar_saldo():
 def logout():
     session.clear()  # limpa os dados da sessão
     return redirect(url_for('login'))
+
+# Inicia o servidor Flask localmente
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
