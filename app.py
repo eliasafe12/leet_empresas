@@ -81,21 +81,40 @@ csrf = CSRFProtect(app)
 inicializar_banco()
 
 
-# converte uma data no formato dia/mês/ano para um objeto date
+
 def validar_data(data):
-    try:
-        return datetime.strptime(data, "%d/%m/%Y").date()
-    # trata valores ausentes ou datas que não correspondem ao formato esperado
-    except (TypeError, ValueError):
-        raise ValueError("Data inválida")
+    if not data:
+        raise ValueError("Informe a data de vencimento.")
+
+    return converter_data(data)
+
     
+def converter_data(valor):
+    if isinstance(valor, datetime):
+        return valor.date()
+
+    if isinstance(valor, date):
+        return valor
+
+    valor = str(valor).strip()
+
+    for formato in ("%Y-%m-%d", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(valor[:10] if formato == "%Y-%m-%d" else valor,formato).date()
+        except ValueError:
+            continue
+
+    raise ValueError(f"Data inválida: {valor}")
+
+
 # lê os códigos e as quantidades dos produtos enviados por um formulário
 def ler_itens(form):
     codigos = form.getlist("codigo[]")
     quantidades = form.getlist("quantidade[]")
     # verifica se há produtos e se cada código possui uma quantidade correspondente
     if not codigos or len(codigos) != len(quantidades):
-        raise ValueError("Adicione pelo menos um produto")
+        flash("Adicione pelo menos um produto")
+        return redirect(url_for("dashboard"))
 
     # organiza os itens em um dicionário, somando as quantidades de códigos repetidos
     itens = {}
@@ -113,19 +132,20 @@ def ler_itens(form):
         itens[codigo] = itens.get(codigo, 0) + qtd   # soma repetidos
     return itens
 
-# calcula o total das movimentações de vendas ou compras para uma data
+
 def calcular_total_movimentacao(tipo, data):
-    # seleciona os registros de acordo com o tipo de movimentação informado
-    if tipo == 'venda':
-        itens = selectVendas()
-    elif tipo == 'compra':
-        itens = selectCompras()
-    # acumula os valores das movimentações encontradas
-    total = 0
-    for i in itens:
-        # compara a data do registro com a data atual e soma os valores correspondentes
-        if i[f"data_{tipo}"][:10] == date.today().strftime("%d/%m/%Y"):
-            total += i["preco_total"]
+    if tipo not in ("venda", "compra"):
+        raise ValueError("Tipo inválido. Use 'venda' ou 'compra'.")
+
+    registros = selectVendas() if tipo == "venda" else selectCompras()
+    total = Decimal("0")
+
+    for registro in registros:
+        data_registro = converter_data(registro[f"data_{tipo}"])
+
+        if data_registro == converter_data(data):
+            total += Decimal(str(registro["preco_total"]))
+
     return total
 
 # cria um decorador para impedir o acesso a rotas por usuários não autenticados
@@ -219,15 +239,14 @@ def dashboard():
     notificacoes = []
 
     # obtém a data atual no formato dia/mês/ano
-    data_atual = date.today().strftime("%d/%m/%Y")
+    data_atual = date.today()
 
     # calcula os totais de vendas e compras do dia
     total_vendas_hoje = calcular_total_movimentacao("venda", data_atual)
     total_compras_hoje = calcular_total_movimentacao("compra", data_atual)
 
     # soma os valores das contas cujo vencimento corresponde à data atual
-    total_contas = sum(Decimal(conta["valor_conta"]) for conta in contas if conta["vencimento"][:10] == data_atual)
-
+    total_contas = sum((Decimal(str(conta["valor_conta"])) for conta in contas if converter_data(conta["vencimento"]) == data_atual), Decimal("0"))
     # cria o objeto responsável por calcular o saldo diário
     saldo_diario = SaldoDiario(total_vendas_hoje, total_compras_hoje, total_contas)
 
@@ -250,11 +269,6 @@ def dashboard():
         # adiciona à lista os avisos retornados pela classe
         if aviso:
             notificacoes.append(aviso)
-
-    # exibe informações temporárias no terminal para auxiliar na depuração
-    print("DATA:", data_atual)
-    print("VENDAS:", total_vendas_hoje)
-    print("COMPRAS:", total_compras_hoje)
 
     # renderiza o painel e envia os dados consultados para o template html
     return render_template(
@@ -473,7 +487,7 @@ def registrar_conta():
     valor = request.form.get('valor')
     vencimento = request.form.get('vencimento')
     try:
-        # valida e converte a data para um objeto date
+         #valida e converte a data para um objeto date
         vencimento = validar_data(vencimento)
     # informa quando a data não estiver no formato esperado
     except ValueError as e:
@@ -515,7 +529,7 @@ def registrar_saldo():
     except (TypeError, ValueError, InvalidOperation):
         return {"erro": "saldo inválido"}, 400
     # registra o saldo associado à data atual
-    insertSaldoDiario(saldo,date.today().strftime("%Y-%m-%d"))
+    insertSaldoDiario(saldo,date.today().strftime())
     return {"sucesso": "Saldo registrado com sucesso"}, 200
 
 # rota de logout
