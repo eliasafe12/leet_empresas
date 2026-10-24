@@ -71,6 +71,12 @@ def obter_ou_criar_chave_secreta():
 # cria a aplicação flask
 app = Flask(__name__)
 
+# permite campos de formulário de até 4 MB (foto em base64)
+app.config["MAX_FORM_MEMORY_SIZE"] = 4 * 1024 * 1024
+
+# limite total da requisição
+app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+
 # configura a chave secreta usada para assinar os dados da sessão
 app.secret_key = obter_ou_criar_chave_secreta()
 
