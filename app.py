@@ -1,4 +1,3 @@
-
 # importa as classes responsáveis por representar as entidades do sistema
 from models.venda import Venda
 from models.compra import Compra
@@ -104,9 +103,11 @@ def converter_data(valor):
 
     valor = str(valor).strip()
 
+    # formatos aceitos: ISO (2026-10-23), brasileiro (23/10/2026)
+    # e brasileiro com hora (23/10/2026 23:54), que é o salvo em vendas e compras
     for formato in ("%Y-%m-%d", "%d/%m/%Y"):
         try:
-            return datetime.strptime(valor[:10] if formato == "%Y-%m-%d" else valor,formato).date()
+            return datetime.strptime(valor[:10], formato).date()
         except ValueError:
             continue
 
@@ -535,7 +536,7 @@ def registrar_saldo():
     except (TypeError, ValueError, InvalidOperation):
         return {"erro": "saldo inválido"}, 400
     # registra o saldo associado à data atual
-    insertSaldoDiario(saldo,date.today().strftime())
+    insertSaldoDiario(saldo, date.today().strftime("%d/%m/%Y"))
     return {"sucesso": "Saldo registrado com sucesso"}, 200
 
 # rota de logout

@@ -1,4 +1,3 @@
-
 from datetime import date, datetime
 
 
@@ -21,7 +20,7 @@ class Conta:
             try:
                 vencimento = datetime.strptime(valor_data[:10], "%Y-%m-%d").date()
             except ValueError:
-                vencimento = datetime.strptime(valor_data).date()
+                vencimento = datetime.strptime(valor_data[:10], "%d/%m/%Y").date()
 
         diferenca = (vencimento - hoje).days
 
