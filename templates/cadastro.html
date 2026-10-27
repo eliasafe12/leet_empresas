@@ -25,6 +25,16 @@
                     </div>
                 {% endif %}
 
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    <div class="flash-messages">
+                      {% for message in messages %}
+                        <p class="error-message">{{ message }}</p>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+
                 <form action="{{ url_for('cadastro') }}" method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">

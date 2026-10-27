@@ -1,3 +1,4 @@
+# arquivo principal da aplicação, com a configuração do flask, as funções de validação e as rotas do sistema
 # importa as classes responsáveis por representar as entidades do sistema
 from models.venda import Venda
 from models.compra import Compra
@@ -87,30 +88,38 @@ inicializar_banco()
 
 
 
+# valida a data de vencimento informada e a converte para um objeto date
 def validar_data(data):
+    # exige que alguma data tenha sido informada
     if not data:
         raise ValueError("Informe a data de vencimento.")
 
+    # reaproveita a função de conversão para aceitar os formatos permitidos
     return converter_data(data)
 
     
+# converte textos, datas ou datas com hora em um objeto date
 def converter_data(valor):
+    # extrai somente a data quando o valor já é um datetime
     if isinstance(valor, datetime):
         return valor.date()
 
+    # devolve o próprio valor quando ele já é uma data
     if isinstance(valor, date):
         return valor
 
+    # transforma o valor em texto sem espaços nas extremidades
     valor = str(valor).strip()
 
-    # formatos aceitos: ISO (2026-10-23), brasileiro (23/10/2026)
-    # e brasileiro com hora (23/10/2026 23:54), que é o salvo em vendas e compras
-    for formato in ("%Y-%m-%d", "%d/%m/%Y"):
+    # formatos aceitos integralmente, incluindo a hora nas movimentações antigas
+    for formato in ("%Y-%m-%d", "%d/%m/%Y", "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"):
         try:
-            return datetime.strptime(valor[:10], formato).date()
+            return datetime.strptime(valor, formato).date()
         except ValueError:
+            # tenta o próximo formato quando o valor não corresponde
             continue
 
+    # informa que nenhum dos formatos aceitos correspondeu ao valor
     raise ValueError(f"Data inválida: {valor}")
 
 
@@ -120,8 +129,7 @@ def ler_itens(form):
     quantidades = form.getlist("quantidade[]")
     # verifica se há produtos e se cada código possui uma quantidade correspondente
     if not codigos or len(codigos) != len(quantidades):
-        flash("Adicione pelo menos um produto")
-        return redirect(url_for("dashboard"))
+        raise ValueError("Adicione pelo menos um produto")
 
     # organiza os itens em um dicionário, somando as quantidades de códigos repetidos
     itens = {}
@@ -136,23 +144,37 @@ def ler_itens(form):
         # impede o registro de quantidades iguais ou inferiores a zero
         if qtd <= 0:
             raise ValueError("A quantidade deve ser maior que zero")
+        if qtd > 1_000_000:
+            raise ValueError("A quantidade máxima por item é 1.000.000")
         itens[codigo] = itens.get(codigo, 0) + qtd   # soma repetidos
+        if itens[codigo] > 1_000_000:
+            raise ValueError("A quantidade máxima por item é 1.000.000")
+    # devolve o dicionário com o código e a quantidade total de cada produto
     return itens
 
 
+# soma o valor das vendas ou das compras realizadas em uma determinada data
 def calcular_total_movimentacao(tipo, data):
+    # aceita somente os tipos venda e compra
     if tipo not in ("venda", "compra"):
         raise ValueError("Tipo inválido. Use 'venda' ou 'compra'.")
 
+    # busca os registros do tipo solicitado
     registros = selectVendas() if tipo == "venda" else selectCompras()
+    # começa o total em zero
     total = Decimal("0")
 
+    # percorre os registros comparando a data de cada um
     for registro in registros:
+        # converte a data salva, que inclui a hora, para uma data simples
         data_registro = converter_data(registro[f"data_{tipo}"])
 
+        # considera apenas os registros da data informada
         if data_registro == converter_data(data):
+            # soma o preço total convertendo por texto para reduzir erros de precisão do float
             total += Decimal(str(registro["preco_total"]))
 
+    # devolve o total da data informada
     return total
 
 # cria um decorador para impedir o acesso a rotas por usuários não autenticados
@@ -213,8 +235,14 @@ def cadastro():
         nome_empresa = request.form.get('nome_empresa')
         senha = request.form.get('senha')
         # exige o preenchimento de todos os campos
+        user_id = user_id.strip() if user_id else ""
+        nome_empresa = nome_empresa.strip() if nome_empresa else ""
+        senha = senha.strip() if senha else ""
         if not user_id or not nome_empresa or not senha:
             flash("Preencha todos os campos", "error")
+            return redirect(url_for('cadastro'))
+        if len(senha) < 6:
+            flash("A senha deve ter pelo menos 6 caracteres", "error")
             return redirect(url_for('cadastro'))
         try:
             # cria o objeto de usuário com os dados recebidos
@@ -316,22 +344,28 @@ def cadastrar_produto():
         # obtém o nome do produto e remove espaços das extremidades
         nome = request.form.get('nome', '').strip()
         # converte os preços para decimal, aceitando vírgula como separador decimal
-        valor_custo = Decimal(request.form.get('valor_custo').replace(',', '.'))
-        valor_venda = Decimal(request.form.get('valor_venda').replace(',', '.'))
+        valor_custo = Decimal(request.form.get('valor_custo', '').replace(',', '.'))
+        valor_venda = Decimal(request.form.get('valor_venda', '').replace(',', '.'))
         # impede valores numéricos que não sejam finitos
-        if not math.isfinite(valor_custo) or not math.isfinite(valor_venda):
+        if not valor_custo.is_finite() or not valor_venda.is_finite():
             flash("Preencha os valores corretamente", "error")
             return redirect(url_for('dashboard'))
         # converte a quantidade informada para inteiro
-        quant = int(request.form.get('quantidade'))
+        quant = int(request.form.get('quantidade', ''))
     # trata erros de campos ausentes ou valores em formatos inválidos
     except (TypeError, ValueError, InvalidOperation):
         flash("Preencha os valores corretamente", "error")
         return redirect(url_for('dashboard'))
 
     # valida o nome, os preços e a quantidade antes de cadastrar o produto
-    if not nome or valor_custo < 0 or valor_venda < 0 or quant < 0:
+    if not nome:
+        flash("Informe o nome do produto", "error")
+        return redirect(url_for('dashboard'))
+    if valor_custo < 0 or valor_venda < 0 or quant < 0:
         flash("Valores não podem ser negativos", "error")
+        return redirect(url_for('dashboard'))
+    if quant > 1_000_000:
+        flash("A quantidade máxima é 1.000.000", "error")
         return redirect(url_for('dashboard'))
 
     # inicializa os dados opcionais da foto
@@ -394,8 +428,13 @@ def editar_preco():
     except (TypeError, ValueError, InvalidOperation):
         return {"erro": "preço inválido"}, 400
     # rejeita preços negativos
-    if novo_preco < 0:
+    if not novo_preco.is_finite() or novo_preco < 0:
         return {"erro": "preço inválido"}, 400
+    # valida o código enviado no json
+    try:
+        codigo = int(codigo)
+    except (TypeError, ValueError):
+        return {"erro": "código inválido"}, 400
     # verifica se o produto informado existe
     if not buscarProduto(codigo):
         return {"erro": "produto não encontrado"}, 404
@@ -423,8 +462,15 @@ def remover_item():
     # recupera o código do item e o tipo de registro a remover
     codigo = dados.get('codigo')
     tipo_item = dados.get('tipo')
-    # executa a remoção por meio da função do módulo crud
-    deleteItem(codigo, tipo_item)
+    # valida o código antes de chamar a função de remoção
+    try:
+        codigo = int(codigo)
+        if codigo <= 0 or not tipo_item:
+            raise ValueError("Código e tipo são obrigatórios")
+        # executa a remoção por meio da função do módulo crud
+        deleteItem(codigo, tipo_item)
+    except (ValueError, TypeError) as e:
+        return {"erro": str(e)}, 400
     return {"sucesso": "Item removido com sucesso"}, 200
 
 # registra uma venda com um ou mais produtos
@@ -435,7 +481,8 @@ def registrar_venda():
     try:
         itens = ler_itens(request.form)
     except ValueError as e:
-        return str(e), 400
+        flash(str(e), "error")
+        return redirect(url_for('dashboard'))
 
     # prepara a lista de itens que será enviada para a classe venda
     cadastrar_venda = []
@@ -467,7 +514,8 @@ def registrar_compra():
     try:
         itens = ler_itens(request.form)
     except ValueError as e:
-        return str(e), 400
+        flash(str(e), "error")
+        return redirect(url_for('dashboard'))
 
     # prepara a lista de itens que será enviada para a classe compra
     cadastrar_compra = []
@@ -490,15 +538,16 @@ def registrar_compra():
 @login_required
 def registrar_conta():
     # recupera os dados enviados pelo formulário
-    descricao = request.form.get('descricao')
-    valor = request.form.get('valor')
+    descricao = request.form.get('descricao', '').strip()
+    valor = request.form.get('valor', '')
     vencimento = request.form.get('vencimento')
     try:
          #valida e converte a data para um objeto date
         vencimento = validar_data(vencimento)
     # informa quando a data não estiver no formato esperado
     except ValueError as e:
-        return str(e), 400
+        flash(str(e), "error")
+        return redirect(url_for('dashboard'))
     try:
         # converte o valor da conta para decimal, aceitando vírgula
         valor = Decimal(valor.replace(',', '.'))
@@ -510,14 +559,14 @@ def registrar_conta():
     if not descricao or valor is None or vencimento is None:
         flash("Preencha todos os campos", "error")
         return redirect(url_for('dashboard'))
-    # impede valores negativos para a conta
-    if valor < 0:
+    # impede valores não finitos ou negativos para a conta
+    if not valor.is_finite() or valor < 0:
         flash("Valor não pode ser negativo", "error")
         return redirect(url_for('dashboard'))
     # cria o objeto conta com os dados validados
     cadastrar_conta = Conta(descricao, Decimal(valor), vencimento)
     # grava as informações da conta no banco de dados
-    insertConta(*cadastrar_conta.getInformacoes())
+    insertConta(cadastrar_conta.descricao, cadastrar_conta.valor, vencimento.isoformat())
     flash("Conta registrada com sucesso", "success")
     return redirect(url_for('dashboard'))
 
@@ -535,8 +584,16 @@ def registrar_saldo():
     # retorna erro quando o saldo não pode ser convertido
     except (TypeError, ValueError, InvalidOperation):
         return {"erro": "saldo inválido"}, 400
-    # registra o saldo associado à data atual
-    insertSaldoDiario(saldo, date.today().strftime("%d/%m/%Y"))
+    # impede que valores especiais como nan e infinity sejam gravados
+    if not saldo.is_finite():
+        return {"erro": "saldo inválido"}, 400
+    # calcula o saldo no servidor para não confiar em valores enviados pelo javascript
+    produtos_contas = selectContas()
+    hoje = date.today()
+    total_contas = sum((Decimal(str(conta["valor_conta"])) for conta in produtos_contas if converter_data(conta["vencimento"]) == hoje), Decimal("0"))
+    saldo_calculado = SaldoDiario(calcular_total_movimentacao("venda", hoje), calcular_total_movimentacao("compra", hoje), total_contas).saldo
+    # registra o saldo calculado no servidor e usa a data ISO
+    insertSaldoDiario(saldo_calculado, hoje.isoformat())
     return {"sucesso": "Saldo registrado com sucesso"}, 200
 
 # rota de logout
@@ -547,4 +604,4 @@ def logout():
 
 # Inicia o servidor Flask localmente
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='127.0.0.1', port=5000, use_reloader=False)
